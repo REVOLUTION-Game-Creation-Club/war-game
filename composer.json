@@ -1,0 +1,23 @@
+{
+    "name": "lucascourot/war-game",
+    "description": "War - Card game",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lucas Courot",
+            "email": "lucas@courot.com"
+        }
+    ],
+    "require": {
+        "beberlei/assert": "^2.4",
+        "ramsey/uuid": "^3.2"
+    },
+    "require-dev": {
+        "behat/behat": "~3.0.4",
+        "phpunit/phpunit": "^5.2",
+        "phpspec/phpspec": "^2.4"
+    },
+    "autoload": {
+        "psr-4": {"WarGame\\": "src/WarGame"}
+    }
+}

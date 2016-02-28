@@ -1,0 +1,15 @@
+/composer.phar
+
+/vendor/
+
+/.idea/
+
+/docker/logs
+
+.rsync_cache/
+.travis.yml
+Gemfile.lock
+
+.DS_Store
+**/.sass-cache
+*~
