@@ -4,7 +4,7 @@ namespace WarGame\Domain\Card;
 
 use Assert\Assertion;
 
-class Deck
+final class Deck
 {
     private $cards;
 

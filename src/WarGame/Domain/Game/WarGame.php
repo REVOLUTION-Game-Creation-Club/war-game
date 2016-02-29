@@ -2,6 +2,7 @@
 
 namespace WarGame\Domain\Game;
 
+use Assert\Assertion;
 use WarGame\Domain\Card\Deck;
 use WarGame\Domain\Player\Table;
 
@@ -29,6 +30,8 @@ class WarGame
 
     public function dealCards()
     {
+        Assertion::false($this->deck->isEmpty(), 'Deck is empty.');
+
         while (!$this->deck->isEmpty()) {
             $this->table->getPlayer1()->receiveCard($this->deck->pick());
             $this->table->getPlayer2()->receiveCard($this->deck->pick());
