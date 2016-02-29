@@ -2,7 +2,7 @@
 
 namespace WarGame\Domain\Card;
 
-class Card
+final class Card
 {
     private $rank;
     private $suit;
@@ -11,6 +11,17 @@ class Card
     {
         $this->rank = $rank;
         $this->suit = $suit;
+    }
+
+    public static function random()
+    {
+        $suits = Suit::getSuits();
+        $randomSuit = $suits[array_rand($suits, 1)];
+
+        return new self(
+            new Rank(rand(Rank::MIN_WEIGHT, Rank::MAX_WEIGHT)),
+            Suit::$randomSuit()
+        );
     }
 
     public function isGreaterThan(Card $card)

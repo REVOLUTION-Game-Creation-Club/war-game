@@ -18,7 +18,7 @@ class Deck
         $cards = [];
 
         foreach (Suit::getSuits() as $suit) {
-            foreach (range(2, 14) as $rank) {
+            foreach (range(Rank::MIN_WEIGHT, Rank::MAX_WEIGHT) as $rank) {
                 $card = new Card(new Rank($rank), Suit::$suit());
 
                 $cards[] = $card;

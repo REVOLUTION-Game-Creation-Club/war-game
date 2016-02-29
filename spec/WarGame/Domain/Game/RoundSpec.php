@@ -19,52 +19,46 @@ class RoundSpec extends ObjectBehavior
         $this->shouldHaveType('WarGame\Domain\Game\Round');
     }
 
-    function it_adds_one_card_face_up(Card $card, PlayerId $playerId)
+    function it_adds_one_card_face_up()
     {
-        $this->playerAddsCardFaceUp($playerId, $card);
+        $this->playerAddsCardFaceUp(PlayerId::generate(), Card::random());
     }
 
-    function it_cannot_add_more_than_2_cards_face_up(
-        Card $card1, PlayerId $playerId1, Card $card2, PlayerId $playerId2, Card $card3, PlayerId $playerId3
-    ) {
-        $playerId1->toString()->willReturn(Uuid::uuid4()->toString());
-        $playerId2->toString()->willReturn(Uuid::uuid4()->toString());
-        $playerId3->toString()->willReturn(Uuid::uuid4()->toString());
-
-        $this->playerAddsCardFaceUp($playerId1, $card1);
-        $this->playerAddsCardFaceUp($playerId2, $card2);
-        $this->shouldThrow(\InvalidArgumentException::class)->during('playerAddsCardFaceUp', [$playerId3, $card3]);
+    function it_cannot_add_more_than_2_cards_face_up() {
+        $this->playerAddsCardFaceUp(PlayerId::generate(), Card::random());
+        $this->playerAddsCardFaceUp(PlayerId::generate(), Card::random());
+        $this->shouldThrow(\InvalidArgumentException::class)->during('playerAddsCardFaceUp', [PlayerId::generate(), Card::random()]);
     }
 
-    function it_resolves_the_winner(Card $card1, PlayerId $playerId1, Card $card2, PlayerId $playerId2)
+    function it_resolves_the_winner()
     {
-        $playerId1->toString()->willReturn(Uuid::uuid4()->toString());
-        $playerId2->toString()->willReturn(Uuid::uuid4()->toString());
+        $playerId1 = PlayerId::generate();
+        $playerId2 = PlayerId::generate();
 
-        $this->playerAddsCardFaceUp($playerId1, $card1);
-        $this->playerAddsCardFaceUp($playerId2, $card2);
-        $this->resolveWinner()->shouldReturnAnInstanceOf(PlayerId::class);
+        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(3), Suit::clovers()));
+        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(5), Suit::clovers()));
+        $this->resolveWinner()->shouldBeLike($playerId2);
     }
 
-    function it_returns_won_cards(Card $card1, PlayerId $playerId1, Card $card2, PlayerId $playerId2)
+    function it_returns_won_cards()
     {
-        $playerId1->toString()->willReturn(Uuid::uuid4()->toString());
-        $playerId2->toString()->willReturn(Uuid::uuid4()->toString());
+        $playerId1 = PlayerId::generate();
+        $playerId2 = PlayerId::generate();
 
-        $this->playerAddsCardFaceUp($playerId1, $card1)->shouldBeAnInstanceOf(Round::class);
-        $this->playerAddsCardFaceUp($playerId2, $card2)->shouldBeAnInstanceOf(Round::class);
+        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(3), Suit::clovers()))->shouldBeAnInstanceOf(Round::class);
+        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(5), Suit::clovers()))->shouldBeAnInstanceOf(Round::class);
+
         $this->resolveWinner();
         $this->wonCards()->shouldHaveCount(2);
     }
 
-    function it_should_detect_wars(Card $card1, PlayerId $playerId1, Card $card2, PlayerId $playerId2)
+    function it_should_detect_wars()
     {
-        $playerId1->toString()->willReturn(Uuid::uuid4()->toString());
-        $card1->isEquals($card2)->willReturn(true);
-        $playerId2->toString()->willReturn(Uuid::uuid4()->toString());
+        $playerId1 = PlayerId::generate();
+        $playerId2 = PlayerId::generate();
 
-        $this->playerAddsCardFaceUp($playerId1, $card1);
-        $this->playerAddsCardFaceUp($playerId2, $card2);
+        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(8), Suit::clovers()));
+        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(8), Suit::hearts()));
         $this->numberOfCardsInTheRound()->shouldBe(2);
         $this->shouldThrow(War::class)->during('resolveWinner');
         $this->numberOfCardsInTheRound()->shouldBe(2);

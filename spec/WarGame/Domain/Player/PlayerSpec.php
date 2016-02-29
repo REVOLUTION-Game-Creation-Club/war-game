@@ -23,17 +23,17 @@ class PlayerSpec extends ObjectBehavior
         $this->getName()->shouldBe('Lucas');
     }
 
-    function it_should_receive_cards(Card $card)
+    function it_should_receive_cards()
     {
         $this->beConstructedThrough('named', ['Lucas']);
-        $this->receiveCard($card);
+        $this->receiveCard(Card::random());
         $this->isStillHaveCards()->shouldBe(true);
     }
 
-    function it_should_know_how_many_cards_he_has(Card $card)
+    function it_should_know_how_many_cards_he_has()
     {
         $this->beConstructedThrough('named', ['Lucas']);
-        $this->receiveCard($card);
+        $this->receiveCard(Card::random());
         $this->getNbOfCards()->shouldBe(1);
     }
 
@@ -44,21 +44,21 @@ class PlayerSpec extends ObjectBehavior
         $this->isReady()->shouldBe(true);
     }
 
-    function it_should_put_won_cards_on_the_bottom_of_the_stack(Card $card1, Card $card2, Card $card3)
+    function it_should_put_won_cards_on_the_bottom_of_the_stack()
     {
         $this->beConstructedThrough('named', ['Lucas']);
-        $this->receiveCard($card1);
+        $this->receiveCard(Card::random());
         $this->readyToStart();
 
         $this->getNbOfCards()->shouldBe(1);
-        $this->wins([$card2, $card3]);
+        $this->wins([Card::random(), Card::random()]);
         $this->getNbOfCards()->shouldBe(3);
     }
 
-    function it_should_put_one_card_up(Card $card1)
+    function it_should_put_one_card_up()
     {
         $this->beConstructedThrough('named', ['Lucas']);
-        $this->receiveCard($card1);
+        $this->receiveCard(Card::random());
         $this->readyToStart();
 
         $this->getNbOfCards()->shouldBe(1);

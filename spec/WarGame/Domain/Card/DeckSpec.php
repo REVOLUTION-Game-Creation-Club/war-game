@@ -33,12 +33,12 @@ class DeckSpec extends ObjectBehavior
         $this->getNbOfCards()->shouldBe(51);
     }
 
-    function it_should_add_a_card(Card $card)
+    function it_should_add_a_card()
     {
         $this->beConstructedThrough('frenchDeck');
         $this->pick()->shouldHaveType(Card::class);
         $this->getNbOfCards()->shouldBe(51);
-        $this->add($card);
+        $this->add(Card::random());
         $this->getNbOfCards()->shouldBe(52);
     }
 

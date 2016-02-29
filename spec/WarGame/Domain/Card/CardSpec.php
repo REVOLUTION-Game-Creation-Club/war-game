@@ -16,36 +16,36 @@ class CardSpec extends ObjectBehavior
         $this->shouldHaveType('WarGame\Domain\Card\Card');
     }
 
-    function it_should_compare_with_a_greater_card(Card $secondCard)
+    function it_should_compare_with_a_greater_card()
     {
         $this->beConstructedWith(new Rank(5), Suit::hearts());
 
-        $secondCard->getWeight()->willReturn(7);
+        $greaterCard = new Card(new Rank(7), Suit::hearts());
 
-        $this->isGreaterThan($secondCard)->shouldBe(false);
-        $this->isSmallerThan($secondCard)->shouldBe(true);
-        $this->isEquals($secondCard)->shouldBe(false);
+        $this->isGreaterThan($greaterCard)->shouldBe(false);
+        $this->isSmallerThan($greaterCard)->shouldBe(true);
+        $this->isEquals($greaterCard)->shouldBe(false);
     }
 
-    function it_should_compare_with_a_smaller_card(Card $secondCard)
+    function it_should_compare_with_a_smaller_card()
     {
         $this->beConstructedWith(new Rank(5), Suit::hearts());
 
-        $secondCard->getWeight()->willReturn(3);
+        $smallerCard = new Card(new Rank(3), Suit::hearts());
 
-        $this->isGreaterThan($secondCard)->shouldBe(true);
-        $this->isSmallerThan($secondCard)->shouldBe(false);
-        $this->isEquals($secondCard)->shouldBe(false);
+        $this->isGreaterThan($smallerCard)->shouldBe(true);
+        $this->isSmallerThan($smallerCard)->shouldBe(false);
+        $this->isEquals($smallerCard)->shouldBe(false);
     }
 
-    function it_should_compare_with_an_equal_card(Card $secondCard)
+    function it_should_compare_with_an_equal_card()
     {
         $this->beConstructedWith(new Rank(5), Suit::hearts());
 
-        $secondCard->getWeight()->willReturn(5);
+        $sameRankCard = new Card(new Rank(5), Suit::clovers());
 
-        $this->isGreaterThan($secondCard)->shouldBe(false);
-        $this->isSmallerThan($secondCard)->shouldBe(false);
-        $this->isEquals($secondCard)->shouldBe(true);
+        $this->isGreaterThan($sameRankCard)->shouldBe(false);
+        $this->isSmallerThan($sameRankCard)->shouldBe(false);
+        $this->isEquals($sameRankCard)->shouldBe(true);
     }
 }
