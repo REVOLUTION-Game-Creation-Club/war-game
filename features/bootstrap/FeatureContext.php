@@ -118,7 +118,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function theGameStarts()
     {
         $this->round = new \WarGame\Domain\Game\Round();
-//        $this->warGame->playRound($this->round);
+
+        Assert::assertSame(0, $this->round->numberOfCardsInTheRound());
     }
 
     /**
@@ -133,7 +134,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given player :playerNumber turns up :suit :rank
+     * @When player :playerNumber turns up :suit :rank
      */
     public function playerTurnsUpCard($playerNumber, $suit, $rank)
     {
@@ -164,35 +165,92 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then player :playerNumber puts :arg2 cards face down
+     * @Then it's war
      */
-    public function playerPutsCardsFaceDown($arg1, $arg2)
+    public function itSWar()
     {
-        throw new PendingException();
+        try {
+            $this->round->resolveWinner();
+
+            Assert::fail('Players are not in war.');
+        } catch (\WarGame\Domain\Game\War $e) {}
     }
 
     /**
-     * @Then player2 wins all :arg1 cards of the round and puts them, face down, on the bottom of his stack
+     * @Then each player puts :numberOfCards cards face down and one card face up
      */
-    public function playerWinsAllCardsOfTheRoundAndPutsThemFaceDownOnTheBottomOfHisStack($arg1)
+    public function eachPlayerPutsCardsFaceDownAndOneCardFaceUp($numberOfCards)
     {
-        throw new PendingException();
+        $this->round->playerAddsCardsFaceDown(
+            $this->table->getPlayer1()->putCardsFaceDown($numberOfCards)
+        );
+        $this->round->playerAddsCardsFaceDown(
+            $this->table->getPlayer2()->putCardsFaceDown($numberOfCards)
+        );
+
+        $this->round->playerAddsCardFaceUp(
+            $this->table->getPlayer1()->getId(),
+            $this->table->getPlayer1()->putOneCardUp()
+        );
+
+        $this->round->playerAddsCardFaceUp(
+            $this->table->getPlayer2()->getId(),
+            $this->table->getPlayer2()->putOneCardUp()
+        );
     }
 
     /**
-     * @Then both players put three cards down and one card up
+     * @Given players are in a war
      */
-    public function bothPlayersPutThreeCardsDownAndOneCardUp()
+    public function playersAreInAWar()
     {
-        throw new PendingException();
+        $this->round->playerAddsCardFaceUp(
+            $this->table->getPlayer1()->getId(),
+            new WarGame\Domain\Card\Card(new \WarGame\Domain\Card\Rank(2), \WarGame\Domain\Card\Suit::hearts())
+        );
+        $this->round->playerAddsCardFaceUp(
+            $this->table->getPlayer2()->getId(),
+            new WarGame\Domain\Card\Card(new \WarGame\Domain\Card\Rank(2), \WarGame\Domain\Card\Suit::clovers())
+        );
+
+        try {
+            $this->round->resolveWinner();
+        } catch (\WarGame\Domain\Game\War $e) {}
     }
 
     /**
-     * @Then the player with the highest card wins all the cards of the round and puts them, face down, on the bottom of his stack
+     * @When each player puts :numberOfCards cards face down
      */
-    public function thePlayerWithTheHighestCardWinsAllTheCardsOfTheRoundAndPutsThemFaceDownOnTheBottomOfHisStack()
+    public function eachPlayerPutsCardsFaceDown($numberOfCards)
     {
-        throw new PendingException();
+        $this->round->playerAddsCardsFaceDown(
+            $this->table->getPlayer1()->putCardsFaceDown($numberOfCards)
+        );
+        $this->round->playerAddsCardsFaceDown(
+            $this->table->getPlayer2()->putCardsFaceDown($numberOfCards)
+        );
+    }
+
+    /**
+     * @Then player :playerNumber wins all :numberOfCards cards of the round and puts them, face down, on the bottom of his stack
+     */
+    public function playerWinsAllCardsOfTheRoundAndPutsThemFaceDownOnTheBottomOfHisStack2($playerNumber, $numberOfCards)
+    {
+        try {
+            $winnerId = $this->round->resolveWinner();
+
+            $winner = $this->table->get($winnerId);
+            $nbOfCardsBeforeRoundIsFinished = $winner->getNbOfCards();
+
+            Assert::assertSame(intval($numberOfCards), $this->round->numberOfCardsInTheRound());
+            Assert::assertSame($winner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
+
+            $winner->wins($this->round->wonCards());
+
+            Assert::assertSame($winner->getNbOfCards(), $nbOfCardsBeforeRoundIsFinished + intval($numberOfCards));
+        } catch (\WarGame\Domain\Game\War $e) {
+            Assert::fail('Players should not be in war again.');
+        }
     }
 
     /**

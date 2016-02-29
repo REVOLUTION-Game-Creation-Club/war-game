@@ -1,5 +1,5 @@
 Feature: Play War Game
-  In order win the war game
+  In order to win the war game
   As a player
   I need to win all 52 cards
 
@@ -17,19 +17,33 @@ Feature: Play War Game
 
   Scenario: One of the two cards is higher than the other
     Given a new round has started
-    And player 1 turns up clovers 7
+    When player 1 turns up clovers 7
     And player 2 turns up hearts 5
     Then player 1 wins both cards and puts them, face down, on the bottom of his stack
 
   Scenario: Cards are the same rank (War)
     Given a new round has started
-    And player 1 turns up clovers 8
+    When player 1 turns up clovers 8
     And player 2 turns up hearts 8
-    Then player 1 puts 3 cards face down
-    Then player 2 puts 3 cards face down
+    Then it's war
+    And each player puts 3 cards face down and one card face up
+
+  Scenario: Double war
+    Given a new round has started
+    And players are in a war
+    When each player puts 3 cards face down
+    And player 1 turns up pikes 3
+    And player 2 turns up hearts 3
+    Then it's war
+    And each player puts 3 cards face down and one card face up
+
+  Scenario: Single war
+    Given a new round has started
+    And players are in a war
+    When each player puts 3 cards face down
     And player 1 turns up pikes 3
     And player 2 turns up hearts 6
-    Then player2 wins all 10 cards of the round and puts them, face down, on the bottom of his stack
+    Then player 2 wins all 10 cards of the round and puts them, face down, on the bottom of his stack
 
   Scenario: Game is over
     Given I won all 52 cards or I win 5 Wars

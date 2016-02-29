@@ -85,4 +85,19 @@ class Player
 
         return $this->deck->pick();
     }
+
+    public function putCardsFaceDown($nbOfCards)
+    {
+        $cardsFaceDown = [];
+
+        if ($this->deck->getNbOfCards() < $nbOfCards) {
+            throw new NotEnoughCards();
+        }
+
+        while ($nbOfCards-- > 0) {
+            $cardsFaceDown[] = $this->deck->pick();
+        }
+
+        return $cardsFaceDown;
+    }
 }

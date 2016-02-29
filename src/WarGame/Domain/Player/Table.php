@@ -15,6 +15,9 @@ class Table
         $this->players[$player->getId()->toString()] = $player;
     }
 
+    /**
+     * @return Player
+     */
     public function get(PlayerId $playerId)
     {
         return $this->players[$playerId->toString()];

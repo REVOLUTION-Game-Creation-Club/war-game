@@ -5,6 +5,9 @@ namespace spec\WarGame\Domain\Player;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use WarGame\Domain\Card\Card;
+use WarGame\Domain\Card\Rank;
+use WarGame\Domain\Card\Suit;
+use WarGame\Domain\Player\NotEnoughCards;
 
 class PlayerSpec extends ObjectBehavior
 {
@@ -61,5 +64,31 @@ class PlayerSpec extends ObjectBehavior
         $this->getNbOfCards()->shouldBe(1);
         $this->putOneCardUp()->shouldReturnAnInstanceOf(Card::class);
         $this->getNbOfCards()->shouldBe(0);
+    }
+
+    function it_should_put_cards_down()
+    {
+        $this->beConstructedThrough('named', ['Lucas']);
+        $this->receiveCard(new Card(new Rank(3), Suit::clovers()));
+        $this->receiveCard(new Card(new Rank(4), Suit::clovers()));
+        $this->receiveCard(new Card(new Rank(5), Suit::clovers()));
+
+        $this->readyToStart();
+
+        $this->getNbOfCards()->shouldBe(3);
+        $this->putCardsFaceDown(3)->shouldHaveCount(3);
+        $this->getNbOfCards()->shouldBe(0);
+    }
+
+    function it_cannot_return_more_cards_than_available()
+    {
+        $this->beConstructedThrough('named', ['Lucas']);
+        $this->receiveCard(new Card(new Rank(3), Suit::clovers()));
+        $this->receiveCard(new Card(new Rank(4), Suit::clovers()));
+        $this->receiveCard(new Card(new Rank(5), Suit::clovers()));
+
+        $this->readyToStart();
+
+        $this->shouldThrow(NotEnoughCards::class)->during('putCardsFaceDown', [4]);
     }
 }
