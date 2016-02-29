@@ -29,9 +29,9 @@ class Player
         $this->deck = $deck;
     }
 
-    public static function named($name)
+    public static function named($name, PlayerId $playerId)
     {
-        return new self(PlayerId::generate(), $name, new Deck());
+        return new self($playerId, $name, new Deck());
     }
 
     public function getName()

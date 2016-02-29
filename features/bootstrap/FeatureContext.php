@@ -66,8 +66,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function thereAreTwoPlayers()
     {
         $this->table = new \WarGame\Domain\Player\Table();
-        $this->table->welcome(\WarGame\Domain\Player\Player::named('Lucas'));
-        $this->table->welcome(\WarGame\Domain\Player\Player::named('Jeremy'));
+        $this->table->welcome(\WarGame\Domain\Player\Player::named('Lucas', \WarGame\Domain\Player\PlayerId::generate()));
+        $this->table->welcome(\WarGame\Domain\Player\Player::named('Jeremy', \WarGame\Domain\Player\PlayerId::generate()));
 
         Assert::assertTrue($this->table->isFull());
     }
