@@ -8,28 +8,38 @@ use Behat\Gherkin\Node\TableNode;
 
 use PHPUnit_Framework_Assert as Assert;
 
+use WarGame\Domain\Card\Card;
+use WarGame\Domain\Card\Deck;
+use WarGame\Domain\Card\Rank;
+use WarGame\Domain\Card\Suit;
+use WarGame\Domain\Game\Round;
+use WarGame\Domain\Game\WarGame;
+use WarGame\Domain\Player\Player;
+use WarGame\Domain\Player\PlayerId;
+use WarGame\Domain\Player\Table;
+
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext implements Context, SnippetAcceptingContext
+class DomainContext implements Context, SnippetAcceptingContext
 {
     /**
-     * @var \WarGame\Domain\Card\Deck
+     * @var Deck
      */
     private $deck;
 
     /**
-     * @var \WarGame\Domain\Game\WarGame
+     * @var WarGame
      */
     private $warGame;
 
     /**
-     * @var \WarGame\Domain\Game\Round
+     * @var Round
      */
     private $round;
 
     /**
-     * @var \WarGame\Domain\Player\Table
+     * @var Table
      */
     private $table;
 
@@ -49,7 +59,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function thereIsAFrenchDeck()
     {
-        $this->deck = \WarGame\Domain\Card\Deck::frenchDeck();
+        $this->deck = Deck::frenchDeck();
     }
 
     /**
@@ -65,9 +75,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function thereAreTwoPlayers()
     {
-        $this->table = new \WarGame\Domain\Player\Table();
-        $this->table->welcome(\WarGame\Domain\Player\Player::named('Lucas', \WarGame\Domain\Player\PlayerId::generate()));
-        $this->table->welcome(\WarGame\Domain\Player\Player::named('Jeremy', \WarGame\Domain\Player\PlayerId::generate()));
+        $this->table = new Table();
+        $this->table->welcome(Player::named('Lucas', PlayerId::generate()));
+        $this->table->welcome(Player::named('Jeremy', PlayerId::generate()));
 
         Assert::assertTrue($this->table->isFull());
     }
@@ -77,7 +87,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function iDealAllTheCardsFaceDownOneAtATime()
     {
-        $this->warGame = new \WarGame\Domain\Game\WarGame($this->deck, $this->table);
+        $this->warGame = new WarGame($this->deck, $this->table);
         $this->warGame->dealCards();
     }
 
@@ -117,7 +127,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function theGameStarts()
     {
-        $this->round = new \WarGame\Domain\Game\Round();
+        $this->round = new Round();
 
         Assert::assertSame(0, $this->round->numberOfCardsInTheRound());
     }
@@ -130,7 +140,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $this->cardsAreDealt();
         $this->playersAreReady();
 
-        $this->round = new \WarGame\Domain\Game\Round();
+        $this->round = new Round();
     }
 
     /**
@@ -143,7 +153,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $this->round
             ->playerAddsCardFaceUp(
                 $player->getId(),
-                new \WarGame\Domain\Card\Card(new \WarGame\Domain\Card\Rank($rank), \WarGame\Domain\Card\Suit::$suit())
+                new Card(new Rank($rank), Suit::$suit())
             );
     }
 
@@ -177,15 +187,15 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then each player puts :numberOfCards cards face down and one card face up
+     * @Then each player puts :numberOfCardsFaceDown cards face down and one card face up
      */
-    public function eachPlayerPutsCardsFaceDownAndOneCardFaceUp($numberOfCards)
+    public function eachPlayerPutsCardsFaceDownAndOneCardFaceUp($numberOfCardsFaceDown)
     {
         $this->round->playerAddsCardsFaceDown(
-            $this->table->getPlayer1()->putCardsFaceDown($numberOfCards)
+            $this->table->getPlayer1()->putCardsFaceDown($numberOfCardsFaceDown)
         );
         $this->round->playerAddsCardsFaceDown(
-            $this->table->getPlayer2()->putCardsFaceDown($numberOfCards)
+            $this->table->getPlayer2()->putCardsFaceDown($numberOfCardsFaceDown)
         );
 
         $this->round->playerAddsCardFaceUp(
@@ -206,11 +216,11 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $this->round->playerAddsCardFaceUp(
             $this->table->getPlayer1()->getId(),
-            new WarGame\Domain\Card\Card(new \WarGame\Domain\Card\Rank(2), \WarGame\Domain\Card\Suit::hearts())
+            new Card(new Rank(2), Suit::hearts())
         );
         $this->round->playerAddsCardFaceUp(
             $this->table->getPlayer2()->getId(),
-            new WarGame\Domain\Card\Card(new \WarGame\Domain\Card\Rank(2), \WarGame\Domain\Card\Suit::clubs())
+            new Card(new Rank(2), Suit::clubs())
         );
 
         try {

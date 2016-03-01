@@ -6,6 +6,9 @@ use Assert\Assertion;
 
 final class Deck
 {
+    /**
+     * @var Card[]
+     */
     private $cards;
 
     public function __construct(array $cards = [])
