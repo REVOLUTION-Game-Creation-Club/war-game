@@ -42,7 +42,7 @@ class CardSpec extends ObjectBehavior
     {
         $this->beConstructedWith(new Rank(5), Suit::hearts());
 
-        $sameRankCard = new Card(new Rank(5), Suit::clovers());
+        $sameRankCard = new Card(new Rank(5), Suit::clubs());
 
         $this->isGreaterThan($sameRankCard)->shouldBe(false);
         $this->isSmallerThan($sameRankCard)->shouldBe(false);

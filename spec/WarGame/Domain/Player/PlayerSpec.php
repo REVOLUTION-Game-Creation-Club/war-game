@@ -70,9 +70,9 @@ class PlayerSpec extends ObjectBehavior
     function it_should_put_cards_down()
     {
         $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
-        $this->receiveCard(new Card(new Rank(3), Suit::clovers()));
-        $this->receiveCard(new Card(new Rank(4), Suit::clovers()));
-        $this->receiveCard(new Card(new Rank(5), Suit::clovers()));
+        $this->receiveCard(new Card(new Rank(3), Suit::clubs()));
+        $this->receiveCard(new Card(new Rank(4), Suit::clubs()));
+        $this->receiveCard(new Card(new Rank(5), Suit::clubs()));
 
         $this->readyToStart();
 
@@ -84,9 +84,9 @@ class PlayerSpec extends ObjectBehavior
     function it_cannot_return_more_cards_than_available()
     {
         $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
-        $this->receiveCard(new Card(new Rank(3), Suit::clovers()));
-        $this->receiveCard(new Card(new Rank(4), Suit::clovers()));
-        $this->receiveCard(new Card(new Rank(5), Suit::clovers()));
+        $this->receiveCard(new Card(new Rank(3), Suit::clubs()));
+        $this->receiveCard(new Card(new Rank(4), Suit::clubs()));
+        $this->receiveCard(new Card(new Rank(5), Suit::clubs()));
 
         $this->readyToStart();
 

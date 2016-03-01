@@ -17,13 +17,13 @@ Feature: Play War Game
 
   Scenario: One of the two cards is higher than the other
     Given a new round has started
-    When player 1 turns up clovers 7
+    When player 1 turns up clubs 7
     And player 2 turns up hearts 5
     Then player 1 wins both cards and puts them, face down, on the bottom of his stack
 
   Scenario: Cards are the same rank (War)
     Given a new round has started
-    When player 1 turns up clovers 8
+    When player 1 turns up clubs 8
     And player 2 turns up hearts 8
     Then it's war
     And each player puts 3 cards face down and one card face up
@@ -32,7 +32,7 @@ Feature: Play War Game
     Given a new round has started
     And players are in a war
     When each player puts 3 cards face down
-    And player 1 turns up pikes 3
+    And player 1 turns up spades 3
     And player 2 turns up hearts 3
     Then it's war
     And each player puts 3 cards face down and one card face up
@@ -41,7 +41,7 @@ Feature: Play War Game
     Given a new round has started
     And players are in a war
     When each player puts 3 cards face down
-    And player 1 turns up pikes 3
+    And player 1 turns up spades 3
     And player 2 turns up hearts 6
     Then player 2 wins all 10 cards of the round and puts them, face down, on the bottom of his stack
 

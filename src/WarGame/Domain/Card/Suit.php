@@ -4,10 +4,10 @@ namespace WarGame\Domain\Card;
 
 final class Suit
 {
-    const CLOVERS = 'clovers';
-    const TILES = 'tiles';
+    const CLUBS = 'clubs';
+    const DIAMONDS = 'diamonds';
     const HEARTS = 'hearts';
-    const PIKES = 'pikes';
+    const SPADES = 'spades';
 
     private $name;
 
@@ -16,14 +16,14 @@ final class Suit
         $this->name = $name;
     }
 
-    public static function clovers()
+    public static function clubs()
     {
-        return new self(self::CLOVERS);
+        return new self(self::CLUBS);
     }
 
-    public static function tiles()
+    public static function diamonds()
     {
-        return new self(self::TILES);
+        return new self(self::DIAMONDS);
     }
 
     public static function hearts()
@@ -31,9 +31,9 @@ final class Suit
         return new self(self::HEARTS);
     }
 
-    public static function pikes()
+    public static function spades()
     {
-        return new self(self::PIKES);
+        return new self(self::SPADES);
     }
 
     public function getName()
@@ -43,6 +43,6 @@ final class Suit
 
     public static function getSuits()
     {
-        return [self::CLOVERS, self::TILES, self::HEARTS, self::PIKES];
+        return [self::CLUBS, self::DIAMONDS, self::HEARTS, self::SPADES];
     }
 }

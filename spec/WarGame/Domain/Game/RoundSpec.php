@@ -35,8 +35,8 @@ class RoundSpec extends ObjectBehavior
         $playerId1 = PlayerId::generate();
         $playerId2 = PlayerId::generate();
 
-        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(3), Suit::clovers()));
-        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(5), Suit::clovers()));
+        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(3), Suit::clubs()));
+        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(5), Suit::clubs()));
         $this->resolveWinner()->shouldBeLike($playerId2);
     }
 
@@ -45,8 +45,8 @@ class RoundSpec extends ObjectBehavior
         $playerId1 = PlayerId::generate();
         $playerId2 = PlayerId::generate();
 
-        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(3), Suit::clovers()))->shouldBeAnInstanceOf(Round::class);
-        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(5), Suit::clovers()))->shouldBeAnInstanceOf(Round::class);
+        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(3), Suit::clubs()))->shouldBeAnInstanceOf(Round::class);
+        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(5), Suit::clubs()))->shouldBeAnInstanceOf(Round::class);
 
         $this->resolveWinner();
         $this->wonCards()->shouldHaveCount(2);
@@ -57,7 +57,7 @@ class RoundSpec extends ObjectBehavior
         $playerId1 = PlayerId::generate();
         $playerId2 = PlayerId::generate();
 
-        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(8), Suit::clovers()));
+        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(8), Suit::clubs()));
         $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(8), Suit::hearts()));
         $this->numberOfCardsInTheRound()->shouldBe(2);
         $this->shouldThrow(War::class)->during('resolveWinner');
@@ -70,7 +70,7 @@ class RoundSpec extends ObjectBehavior
         $playerId2 = PlayerId::generate();
 
         $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(2), Suit::hearts()));
-        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(2), Suit::clovers()));
+        $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(2), Suit::clubs()));
 
         $this->numberOfCardsInTheRound()->shouldBe(2);
 
@@ -79,19 +79,19 @@ class RoundSpec extends ObjectBehavior
         $this->numberOfCardsInTheRound()->shouldBe(2);
 
         $this->playerAddsCardsFaceDown([
-            new Card(new Rank(4), Suit::clovers()),
+            new Card(new Rank(4), Suit::clubs()),
             new Card(new Rank(4), Suit::hearts()),
-            new Card(new Rank(4), Suit::pikes())
+            new Card(new Rank(4), Suit::spades())
         ]);
         $this->playerAddsCardsFaceDown([
-            new Card(new Rank(5), Suit::clovers()),
+            new Card(new Rank(5), Suit::clubs()),
             new Card(new Rank(5), Suit::hearts()),
-            new Card(new Rank(5), Suit::pikes())
+            new Card(new Rank(5), Suit::spades())
         ]);
 
         $this->numberOfCardsInTheRound()->shouldBe(8);
 
-        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(7), Suit::clovers()));
+        $this->playerAddsCardFaceUp($playerId1, new Card(new Rank(7), Suit::clubs()));
         $this->playerAddsCardFaceUp($playerId2, new Card(new Rank(7), Suit::hearts()));
 
         $this->numberOfCardsInTheRound()->shouldBe(10);
@@ -105,9 +105,9 @@ class RoundSpec extends ObjectBehavior
     {
         $this->numberOfCardsInTheRound()->shouldBe(0);
         $this->playerAddsCardsFaceDown([
-            new Card(new Rank(4), Suit::clovers()),
+            new Card(new Rank(4), Suit::clubs()),
             new Card(new Rank(4), Suit::hearts()),
-            new Card(new Rank(4), Suit::pikes())
+            new Card(new Rank(4), Suit::spades())
         ]);
         $this->numberOfCardsInTheRound()->shouldBe(3);
     }

@@ -210,7 +210,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         );
         $this->round->playerAddsCardFaceUp(
             $this->table->getPlayer2()->getId(),
-            new WarGame\Domain\Card\Card(new \WarGame\Domain\Card\Rank(2), \WarGame\Domain\Card\Suit::clovers())
+            new WarGame\Domain\Card\Card(new \WarGame\Domain\Card\Rank(2), \WarGame\Domain\Card\Suit::clubs())
         );
 
         try {
