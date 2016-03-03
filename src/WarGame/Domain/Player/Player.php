@@ -20,8 +20,6 @@ class Player
      */
     private $deck;
 
-    private $isReady;
-
     private function __construct(PlayerId $playerId, $name, Deck $deck)
     {
         $this->playerId = $playerId;
@@ -39,36 +37,29 @@ class Player
         return $this->name;
     }
 
-    public function isStillHaveCards()
+    public function isOutOfCards()
     {
-        return !empty($this->deck);
+        return $this->deck->isEmpty();
     }
 
     public function receiveCard(Card $card)
     {
-        $this->deck->add($card);
+        $this->deck->addToTheTop($card);
     }
 
+    /**
+     * @param Card[] $cards Won cards
+     */
     public function wins(array $cards)
     {
         foreach ($cards as $card) {
-            $this->deck->add($card);
+            $this->deck->addToTheBottom($card);
         }
     }
 
     public function getNbOfCards()
     {
         return $this->deck->getNbOfCards();
-    }
-
-    public function readyToStart()
-    {
-        $this->isReady = true;
-    }
-
-    public function isReady()
-    {
-        return true === $this->isReady;
     }
 
     /**
@@ -79,25 +70,20 @@ class Player
         return $this->playerId;
     }
 
-    public function putOneCardUp()
+    public function putOneCard()
     {
-        Assertion::false($this->deck->isEmpty());
-
-        return $this->deck->pick();
-    }
-
-    public function putCardsFaceDown($nbOfCards)
-    {
-        $cardsFaceDown = [];
-
-        if ($this->deck->getNbOfCards() < $nbOfCards) {
+        if ($this->deck->isEmpty()) {
             throw new NotEnoughCards();
         }
 
-        while ($nbOfCards-- > 0) {
-            $cardsFaceDown[] = $this->deck->pick();
-        }
+        return $this->deck->pickFromTheTop();
+    }
 
-        return $cardsFaceDown;
+    /**
+     * @return Deck
+     */
+    public function getDeck()
+    {
+        return $this->deck;
     }
 }

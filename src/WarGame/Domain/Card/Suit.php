@@ -45,4 +45,9 @@ final class Suit
     {
         return [self::CLUBS, self::DIAMONDS, self::HEARTS, self::SPADES];
     }
+
+    public function toString()
+    {
+        return $this->getName();
+    }
 }

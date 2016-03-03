@@ -13,7 +13,9 @@ final class Rank
 
     public function __construct($weight)
     {
-        Assertion::range($weight, self::MIN_WEIGHT, self::MAX_WEIGHT);
+        Assertion::range(
+            $weight, self::MIN_WEIGHT, self::MAX_WEIGHT, 'Rank weight "%s" was expected to be at least "%d" and at most "%d".'
+        );
 
         $this->weight = $weight;
     }
@@ -41,5 +43,21 @@ final class Rank
     public function getWeight()
     {
         return $this->weight;
+    }
+
+    public function toString()
+    {
+        switch ($this->weight) {
+            case 14:
+                return 'ace';
+            case 13:
+                return 'king';
+            case 12:
+                return 'queen';
+            case 11:
+                return 'jack';
+            default:
+                return $this->weight;
+        }
     }
 }

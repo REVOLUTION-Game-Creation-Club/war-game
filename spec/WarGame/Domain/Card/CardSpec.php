@@ -48,4 +48,16 @@ class CardSpec extends ObjectBehavior
         $this->isSmallerThan($sameRankCard)->shouldBe(false);
         $this->isEquals($sameRankCard)->shouldBe(true);
     }
+
+    function it_get_its_name_for_a_number()
+    {
+        $this->beConstructedWith(new Rank(5), Suit::hearts());
+        $this->toString()->shouldBe('5 hearts');
+    }
+
+    function it_get_its_name_for_a_king()
+    {
+        $this->beConstructedWith(Rank::king(), Suit::clubs());
+        $this->toString()->shouldBe('king clubs');
+    }
 }

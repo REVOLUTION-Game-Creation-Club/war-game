@@ -43,4 +43,14 @@ final class Card
     {
         return $this->rank->getWeight();
     }
+
+    public function getSuit()
+    {
+        return $this->suit;
+    }
+
+    public function toString()
+    {
+        return sprintf('%s %s', $this->rank->toString(), $this->suit->toString());
+    }
 }

@@ -13,6 +13,7 @@ use WarGame\Domain\Card\Deck;
 use WarGame\Domain\Card\Rank;
 use WarGame\Domain\Card\Suit;
 use WarGame\Domain\Game\Round;
+use WarGame\Domain\Game\War;
 use WarGame\Domain\Game\WarGame;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
@@ -44,6 +45,11 @@ class DomainContext implements Context, SnippetAcceptingContext
     private $table;
 
     /**
+     * @var Player
+     */
+    private $currentRoundWinner;
+
+    /**
      * Initializes context.
      *
      * Every scenario gets its own context instance.
@@ -71,13 +77,13 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given there are two players
+     * @Given there are two players around the table
      */
-    public function thereAreTwoPlayers()
+    public function thereAreTwoPlayersAroundTheTable()
     {
         $this->table = new Table();
-        $this->table->welcome(Player::named('Lucas', PlayerId::generate()));
-        $this->table->welcome(Player::named('Jeremy', PlayerId::generate()));
+        $this->table->welcome(Player::named('Player 1', PlayerId::generate()));
+        $this->table->welcome(Player::named('Player 2', PlayerId::generate()));
 
         Assert::assertTrue($this->table->isFull());
     }
@@ -87,8 +93,10 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function iDealAllTheCardsFaceDownOneAtATime()
     {
-        $this->warGame = new WarGame($this->deck, $this->table);
-        $this->warGame->dealCards();
+        while (!$this->deck->isEmpty()) {
+            $this->table->getPlayer1()->receiveCard($this->deck->pickFromTheTop());
+            $this->table->getPlayer2()->receiveCard($this->deck->pickFromTheTop());
+        }
     }
 
     /**
@@ -101,77 +109,104 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given cards are dealt
+     * @Then player :playerNumber should have following cards:
      */
-    public function cardsAreDealt()
-    {
-        $this->thereIsAFrenchDeck();
-        $this->cardsAreShuffled();
-        $this->thereAreTwoPlayers();
-        $this->iDealAllTheCardsFaceDownOneAtATime();
-
-        Assert::assertTrue($this->deck->isEmpty());
-    }
-
-    /**
-     * @When players are ready
-     */
-    public function playersAreReady()
-    {
-        $this->table->getPlayer1()->readyToStart();
-        $this->table->getPlayer2()->readyToStart();
-    }
-
-    /**
-     * @Then the game starts
-     */
-    public function theGameStarts()
-    {
-        $this->round = new Round();
-
-        Assert::assertSame(0, $this->round->numberOfCardsInTheRound());
-    }
-
-    /**
-     * @Given a new round has started
-     */
-    public function aNewRoundHasStarted()
-    {
-        $this->cardsAreDealt();
-        $this->playersAreReady();
-
-        $this->round = new Round();
-    }
-
-    /**
-     * @When player :playerNumber turns up :suit :rank
-     */
-    public function playerTurnsUpCard($playerNumber, $suit, $rank)
+    public function playerShouldHaveFollowingCards($playerNumber, TableNode $cards)
     {
         $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
 
-        $this->round
-            ->playerAddsCardFaceUp(
-                $player->getId(),
-                new Card(new Rank($rank), Suit::$suit())
-            );
+        $cardsOfThePlayer = $player->getDeck()->getCards();
+
+        foreach ($cards as $id => $card) {
+            $rankValue = $card['rank'];
+            $suitValue = strtolower($card['suit']);
+
+            $rank = is_numeric($card['rank']) ? new Rank(intval($rankValue)) : Rank::$rankValue();
+            $suit = Suit::$suitValue();
+
+            $expectedCard = new Card($rank, $suit);
+
+            Assert::assertTrue($expectedCard->isEquals($cardsOfThePlayer[$id]));
+        }
     }
 
     /**
-     * @Then player :playerNumber wins both cards and puts them, face down, on the bottom of his stack
+     * @When the first round starts
      */
-    public function playerWinsBothCardsAndPutsThemFaceDownOnTheBottomOfHisStack($playerNumber)
+    public function theFirstRoundStarts()
     {
-        $playerId = $this->round->resolveWinner();
+        $this->round = new Round(1, $this->table);
+    }
 
-        $winner = $this->table->get($playerId);
+    /**
+     * @Then following cards should be on the table:
+     */
+    public function followingCardsShouldBeOnTheTable(TableNode $cards)
+    {
+        try {
+            $this->round->play();
+        } catch (War $e) {}
 
-        $nbOfCardsBeforeRoundIsFinished = $winner->getNbOfCards();
+        $cardsOnTheTable = $this->round->getAllCards();
 
-        $winner->wins($this->round->wonCards());
+        foreach ($cards as $card) {
+            $rankValue = $card['rank'];
+            $suitValue = strtolower($card['suit']);
 
-        Assert::assertSame($winner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
-        Assert::assertSame($winner->getNbOfCards(), $nbOfCardsBeforeRoundIsFinished + 2);
+            $rank = is_numeric($card['rank']) ? new Rank(intval($rankValue)) : Rank::$rankValue();
+            $suit = Suit::$suitValue();
+
+            $expectedCard = new Card($rank, $suit);
+            foreach ($cardsOnTheTable as $cardOnTheTable) {
+                if ($cardOnTheTable->isEquals($expectedCard)) {
+                    continue 2;
+                }
+            }
+
+            Assert::fail(sprintf('Card "%s" is not on the table', $expectedCard->toString()));
+        }
+    }
+
+    /**
+     * @Given player :playerNumber receives following cards:
+     */
+    public function playerReceivesFollowingCards($playerNumber, TableNode $cards)
+    {
+        $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
+
+        foreach ($cards as $card) {
+            $rankValue = $card['rank'];
+            $suitValue = strtolower($card['suit']);
+
+            if ('x' == $rankValue) {
+                $player->receiveCard(Card::random());
+
+                continue;
+            }
+
+            $rank = is_numeric($card['rank']) ? new Rank(intval($rankValue)) : Rank::$rankValue();
+            $suit = Suit::$suitValue();
+
+            $player->receiveCard(new Card($rank, $suit));
+        }
+    }
+
+    /**
+     * @When players finish to play the round
+     */
+    public function playersFinishToPlayTheRound()
+    {
+        $this->currentRoundWinner = $this->round->play();
+    }
+
+    /**
+     * @When players finish to play the war round
+     */
+    public function playersFinishToPlayTheWarRound()
+    {
+        try {
+            $this->currentRoundWinner = $this->round->play(Round::ROUND_IS_IN_WAR);
+        } catch (War $e) {}
     }
 
     /**
@@ -180,102 +215,100 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function itSWar()
     {
         try {
-            $this->round->resolveWinner();
+            $this->currentRoundWinner = $this->round->play();
 
             Assert::fail('Players are not in war.');
-        } catch (\WarGame\Domain\Game\War $e) {}
+        } catch (War $e) {}
     }
 
     /**
-     * @Then each player puts :numberOfCardsFaceDown cards face down and one card face up
+     * @When it's double war
      */
-    public function eachPlayerPutsCardsFaceDownAndOneCardFaceUp($numberOfCardsFaceDown)
+    public function itSDoubleWar()
     {
-        $this->round->playerAddsCardsFaceDown(
-            $this->table->getPlayer1()->putCardsFaceDown($numberOfCardsFaceDown)
-        );
-        $this->round->playerAddsCardsFaceDown(
-            $this->table->getPlayer2()->putCardsFaceDown($numberOfCardsFaceDown)
-        );
-
-        $this->round->playerAddsCardFaceUp(
-            $this->table->getPlayer1()->getId(),
-            $this->table->getPlayer1()->putOneCardUp()
-        );
-
-        $this->round->playerAddsCardFaceUp(
-            $this->table->getPlayer2()->getId(),
-            $this->table->getPlayer2()->putOneCardUp()
-        );
-    }
-
-    /**
-     * @Given players are in a war
-     */
-    public function playersAreInAWar()
-    {
-        $this->round->playerAddsCardFaceUp(
-            $this->table->getPlayer1()->getId(),
-            new Card(new Rank(2), Suit::hearts())
-        );
-        $this->round->playerAddsCardFaceUp(
-            $this->table->getPlayer2()->getId(),
-            new Card(new Rank(2), Suit::clubs())
-        );
-
         try {
-            $this->round->resolveWinner();
-        } catch (\WarGame\Domain\Game\War $e) {}
-    }
+            $this->currentRoundWinner = $this->round->play(Round::ROUND_IS_IN_WAR);
 
-    /**
-     * @When each player puts :numberOfCards cards face down
-     */
-    public function eachPlayerPutsCardsFaceDown($numberOfCards)
-    {
-        $this->round->playerAddsCardsFaceDown(
-            $this->table->getPlayer1()->putCardsFaceDown($numberOfCards)
-        );
-        $this->round->playerAddsCardsFaceDown(
-            $this->table->getPlayer2()->putCardsFaceDown($numberOfCards)
-        );
+            Assert::fail('Players are not in double war.');
+        } catch (War $e) {}
     }
 
     /**
      * @Then player :playerNumber wins all :numberOfCards cards of the round and puts them, face down, on the bottom of his stack
      */
-    public function playerWinsAllCardsOfTheRoundAndPutsThemFaceDownOnTheBottomOfHisStack2($playerNumber, $numberOfCards)
+    public function playerWinsAllCardsOfTheRoundAndPutsThemFaceDownOnTheBottomOfHisStack($playerNumber, $numberOfCards)
     {
-        try {
-            $winnerId = $this->round->resolveWinner();
+        Assert::assertSame(intval($numberOfCards), $this->round->numberOfCardsInTheRound());
+        Assert::assertSame($this->currentRoundWinner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
+        Assert::assertSame($this->currentRoundWinner->getNbOfCards(), intval($numberOfCards));
+    }
 
-            $winner = $this->table->get($winnerId);
-            $nbOfCardsBeforeRoundIsFinished = $winner->getNbOfCards();
+    /**
+     * @Given there are following cards in the deck:
+     */
+    public function thereAreFollowingCardsInTheDeck(TableNode $cards)
+    {
+        $this->deck = new Deck();
 
-            Assert::assertSame(intval($numberOfCards), $this->round->numberOfCardsInTheRound());
-            Assert::assertSame($winner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
+        foreach ($cards as $card) {
+            $rankValue = $card['rank'];
+            $suitValue = strtolower($card['suit']);
 
-            $winner->wins($this->round->wonCards());
+            if ('x' == $rankValue) {
+                $this->deck->addToTheTop(Card::random());
 
-            Assert::assertSame($winner->getNbOfCards(), $nbOfCardsBeforeRoundIsFinished + intval($numberOfCards));
-        } catch (\WarGame\Domain\Game\War $e) {
-            Assert::fail('Players should not be in war again.');
+                continue;
+            }
+
+            $rank = is_numeric($card['rank']) ? new Rank(intval($rankValue)) : Rank::$rankValue();
+            $suit = Suit::$suitValue();
+
+            $this->deck->addToTheTop(new Card($rank, $suit));
         }
     }
 
     /**
-     * @Given I won all :arg1 cards or I win :arg2 Wars
+     * @When cards are dealt but not shuffled
      */
-    public function iWonAllCardsOrIWinWars($arg1, $arg2)
+    public function cardsAreDealtButNotShuffled()
     {
-        throw new PendingException();
+        $this->warGame = new WarGame($this->deck, $this->table);
+        $this->warGame->dealCards(false);
     }
 
     /**
-     * @Then I won the game
+     * @When players play the game
      */
-    public function iWonTheGame()
+    public function playersPlayTheGame()
     {
-        throw new PendingException();
+        $this->warGame->play();
+    }
+
+    /**
+     * @Then player :playerNumber loses the game
+     */
+    public function playerLosesTheGame($playerNumber)
+    {
+        $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
+
+        Assert::assertNotSame($this->warGame->getWinner(), $player);
+    }
+
+    /**
+     * @Then player :playerNumber wins the game
+     */
+    public function playerWinsTheGame($playerNumber)
+    {
+        $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
+
+        Assert::assertSame($this->warGame->getWinner(), $player);
+    }
+
+    /**
+     * @Then they played :nbOfRounds rounds
+     */
+    public function theyPlayedRounds($nbOfRounds)
+    {
+        Assert::assertSame(count($this->warGame->getRounds()), intval($nbOfRounds));
     }
 }

@@ -41,20 +41,36 @@ final class Deck
         return count($this->cards);
     }
 
-    public function pick()
+    /**
+     * @return Card
+     */
+    public function pickFromTheTop()
     {
-        Assertion::notEmpty($this->cards);
+        Assertion::notEmpty($this->cards, 'You cannot pick a card from an empty deck.');
 
-        return array_shift($this->cards);
+        return array_pop($this->cards);
     }
 
-    public function add(Card $card)
+    public function addToTheTop(Card $card)
     {
         $this->cards[] = $card;
+    }
+
+    public function addToTheBottom(Card $card)
+    {
+        array_unshift($this->cards, $card);
     }
 
     public function isEmpty()
     {
         return empty($this->cards);
+    }
+
+    /**
+     * @return Card[]
+     */
+    public function getCards()
+    {
+        return $this->cards;
     }
 }

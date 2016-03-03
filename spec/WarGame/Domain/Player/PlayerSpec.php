@@ -5,6 +5,7 @@ namespace spec\WarGame\Domain\Player;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use WarGame\Domain\Card\Card;
+use WarGame\Domain\Card\Deck;
 use WarGame\Domain\Card\Rank;
 use WarGame\Domain\Card\Suit;
 use WarGame\Domain\Player\NotEnoughCards;
@@ -28,7 +29,7 @@ class PlayerSpec extends ObjectBehavior
     {
         $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
         $this->receiveCard(Card::random());
-        $this->isStillHaveCards()->shouldBe(true);
+        $this->isOutOfCards()->shouldBe(false);
     }
 
     function it_should_know_how_many_cards_he_has()
@@ -38,18 +39,10 @@ class PlayerSpec extends ObjectBehavior
         $this->getNbOfCards()->shouldBe(1);
     }
 
-    function it_should_signal_if_he_is_ready()
-    {
-        $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
-        $this->readyToStart();
-        $this->isReady()->shouldBe(true);
-    }
-
     function it_should_put_won_cards_on_the_bottom_of_the_stack()
     {
         $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
         $this->receiveCard(Card::random());
-        $this->readyToStart();
 
         $this->getNbOfCards()->shouldBe(1);
         $this->wins([Card::random(), Card::random()]);
@@ -60,36 +53,23 @@ class PlayerSpec extends ObjectBehavior
     {
         $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
         $this->receiveCard(Card::random());
-        $this->readyToStart();
 
         $this->getNbOfCards()->shouldBe(1);
-        $this->putOneCardUp()->shouldReturnAnInstanceOf(Card::class);
+        $this->putOneCard()->shouldReturnAnInstanceOf(Card::class);
         $this->getNbOfCards()->shouldBe(0);
     }
 
-    function it_should_put_cards_down()
+    function it_cannot_put_one_card_up_if_deck_is_empty()
     {
         $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
-        $this->receiveCard(new Card(new Rank(3), Suit::clubs()));
-        $this->receiveCard(new Card(new Rank(4), Suit::clubs()));
-        $this->receiveCard(new Card(new Rank(5), Suit::clubs()));
 
-        $this->readyToStart();
-
-        $this->getNbOfCards()->shouldBe(3);
-        $this->putCardsFaceDown(3)->shouldHaveCount(3);
         $this->getNbOfCards()->shouldBe(0);
+        $this->shouldThrow(NotEnoughCards::class)->during('putOneCard');
     }
 
-    function it_cannot_return_more_cards_than_available()
+    function it_has_a_deck()
     {
         $this->beConstructedThrough('named', ['Lucas', PlayerId::generate()]);
-        $this->receiveCard(new Card(new Rank(3), Suit::clubs()));
-        $this->receiveCard(new Card(new Rank(4), Suit::clubs()));
-        $this->receiveCard(new Card(new Rank(5), Suit::clubs()));
-
-        $this->readyToStart();
-
-        $this->shouldThrow(NotEnoughCards::class)->during('putCardsFaceDown', [4]);
+        $this->getDeck()->shouldReturnAnInstanceOf(Deck::class);
     }
 }

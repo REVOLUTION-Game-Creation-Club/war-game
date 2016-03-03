@@ -1,50 +1,67 @@
-Feature: Play War Game
+Feature: Play the battles
   In order to win the war game
   As a player
-  I need to win all 52 cards
-
-  Scenario: Deal cards
-    Given there is a french deck of 52 cards
-    And cards are shuffled
-    And there are two players
-    When I deal all the cards face down, one at a time
-    Then each player has 26 cards
-
-  Scenario: Start playing
-    Given cards are dealt
-    When players are ready
-    Then the game starts
+  I need to win battles one by one
 
   Scenario: One of the two cards is higher than the other
-    Given a new round has started
-    When player 1 turns up clubs 7
-    And player 2 turns up hearts 5
-    Then player 1 wins both cards and puts them, face down, on the bottom of his stack
-
-  Scenario: Cards are the same rank (War)
-    Given a new round has started
-    When player 1 turns up clubs 8
-    And player 2 turns up hearts 8
-    Then it's war
-    And each player puts 3 cards face down and one card face up
-
-  Scenario: Double war
-    Given a new round has started
-    And players are in a war
-    When each player puts 3 cards face down
-    And player 1 turns up spades 3
-    And player 2 turns up hearts 3
-    Then it's war
-    And each player puts 3 cards face down and one card face up
+    Given there are two players around the table
+    And player 1 receives following cards:
+      | rank | suit  |
+      | 7    | clubs |
+    And player 2 receives following cards:
+      | rank | suit  |
+      | 5    | clubs |
+    When the first round starts
+    And players finish to play the round
+    Then player 1 wins all 2 cards of the round and puts them, face down, on the bottom of his stack
 
   Scenario: Single war
-    Given a new round has started
-    And players are in a war
-    When each player puts 3 cards face down
-    And player 1 turns up spades 3
-    And player 2 turns up hearts 6
+    Given there are two players around the table
+    And player 1 receives following cards:
+      | rank | suit   |
+      | 3    | spades |
+      | x    |        |
+      | x    |        |
+      | x    |        |
+      | 8    | clubs  |
+    And player 2 receives following cards:
+      | rank | suit   |
+      | ace  | hearts |
+      | x    |        |
+      | x    |        |
+      | x    |        |
+      | 8    | hearts |
+    When the first round starts
+    And it's war
+    And players finish to play the war round
     Then player 2 wins all 10 cards of the round and puts them, face down, on the bottom of his stack
 
-  Scenario: Game is over
-    Given I won all 52 cards or I win 5 Wars
-    Then I won the game
+  Scenario: Double war
+    Given there are two players around the table
+    And player 1 receives following cards:
+      | rank | suit   |
+      | ace  | hearts |
+      | x    |        |
+      | x    |        |
+      | x    |        |
+      | 3    | spades |
+      | x    |        |
+      | x    |        |
+      | x    |        |
+      | 8    | clubs  |
+    And player 2 receives following cards:
+      | rank | suit   |
+      | king | spades |
+      | x    |        |
+      | x    |        |
+      | x    |        |
+      | 3    | hearts |
+      | x    |        |
+      | x    |        |
+      | x    |        |
+      | 8    | hearts |
+    When the first round starts
+    And it's war
+    And it's double war
+    And players finish to play the war round
+    Then player 1 wins all 18 cards of the round and puts them, face down, on the bottom of his stack
