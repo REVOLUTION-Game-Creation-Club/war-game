@@ -48,11 +48,14 @@ class Player
     }
 
     /**
-     * @param Card[] $cards Won cards
+     * @param Card[] $wonCards Won cards
      */
-    public function wins(array $cards)
+    public function wins(array $wonCards)
     {
-        foreach ($cards as $card) {
+        // Prevents some infinite loops
+        shuffle($wonCards);
+
+        foreach ($wonCards as $card) {
             $this->deck->addToTheBottom($card);
         }
     }

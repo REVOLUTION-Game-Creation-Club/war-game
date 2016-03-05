@@ -292,8 +292,8 @@ class DomainContext implements Context, SnippetAcceptingContext
         $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
         $otherPlayer = intval($playerNumber) === 2 ? $this->table->getPlayer1() : $this->table->getPlayer2();
 
-        Assert::assertSame($this->warGame->getWinner(), $player);
-        Assert::assertNotSame($this->warGame->getWinner(), $otherPlayer);
+        Assert::assertTrue($this->warGame->getWinner()->getId()->sameValueAs($player->getId()));
+        Assert::assertNotTrue($this->warGame->getWinner()->getId()->sameValueAs($otherPlayer->getId()));
     }
 
     /**

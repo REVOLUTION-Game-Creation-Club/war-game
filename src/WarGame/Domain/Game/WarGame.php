@@ -10,9 +10,8 @@ use WarGame\Domain\Player\Table;
 class WarGame
 {
     const STATUS_STARTED = 10;
-    const STATUS_CARDS_SHUFFLED = 20;
-    const STATUS_CARDS_DEALT = 30;
-    const STATUS_GAME_OVER = 40;
+    const STATUS_CARDS_DEALT = 20;
+    const STATUS_GAME_OVER = 30;
 
     /**
      * Variant of 1 or 3 cards
@@ -73,19 +72,6 @@ class WarGame
         $this->currentStatus = self::STATUS_STARTED;
     }
 
-    public function shuffleCards()
-    {
-        if ($this->currentStatus > self::STATUS_CARDS_SHUFFLED) {
-            throw new CardsAlreadyDealt();
-        }
-
-        $this->deck->shuffle();
-
-        $this->currentStatus = self::STATUS_CARDS_SHUFFLED;
-
-        return $this;
-    }
-
     public function dealCards()
     {
         if ($this->currentStatus >= self::STATUS_CARDS_DEALT) {
@@ -115,6 +101,7 @@ class WarGame
         $roundNumber = 1;
 
         do {
+
             if (false === $this->isCurrentlyInWar) {
                 $this->rounds[$roundNumber] = new Round($roundNumber, $this->table);
             }
@@ -140,7 +127,7 @@ class WarGame
 
                 continue;
             }
-        } while (!$this->oneOfThePlayersRanOutOfCards());
+        } while ($this->isCurrentlyInWar || !$this->oneOfThePlayersRanOutOfCards());
 
         if (null === $this->winner) {
             $this->winner = $this->table->getPlayer1()->isOutOfCards()

@@ -54,43 +54,10 @@ class WarGameSpec extends ObjectBehavior
         $this->shouldThrow(\InvalidArgumentException::class)->during('__construct', [$deck, $table]);
     }
 
-    function it_shuffles_cards()
-    {
-        $deck = Deck::frenchDeck();
-
-        $lucas = Player::named('Lucas', PlayerId::generate());
-        $jeremy = Player::named('Jeremy', PlayerId::generate());
-
-        $table = new Table();
-        $table->welcome($lucas);
-        $table->welcome($jeremy);
-
-        $this->beConstructedWith($deck, $table);
-        $this->shuffleCards();
-        $this->getCurrentStatus()->shouldBe(WarGame::STATUS_CARDS_SHUFFLED);
-    }
-
-    function it_shuffles_cards_multiple_times()
-    {
-        $deck = Deck::frenchDeck();
-
-        $lucas = Player::named('Lucas', PlayerId::generate());
-        $jeremy = Player::named('Jeremy', PlayerId::generate());
-
-        $table = new Table();
-        $table->welcome($lucas);
-        $table->welcome($jeremy);
-
-        $this->beConstructedWith($deck, $table);
-        $this->shuffleCards();
-        $this->shuffleCards();
-        $this->shuffleCards();
-        $this->getCurrentStatus()->shouldBe(WarGame::STATUS_CARDS_SHUFFLED);
-    }
-
     function it_deals_cards()
     {
         $deck = Deck::frenchDeck();
+        $deck->shuffle();
 
         $lucas = Player::named('Lucas', PlayerId::generate());
         $jeremy = Player::named('Jeremy', PlayerId::generate());
@@ -100,7 +67,6 @@ class WarGameSpec extends ObjectBehavior
         $table->welcome($jeremy);
 
         $this->beConstructedWith($deck, $table);
-        $this->shuffleCards();
         $this->dealCards();
         $this->getCurrentStatus()->shouldBe(WarGame::STATUS_CARDS_DEALT);
     }
@@ -108,6 +74,7 @@ class WarGameSpec extends ObjectBehavior
     function it_cannot_deal_cards_after_they_have_already_been_dealt()
     {
         $deck = Deck::frenchDeck();
+        $deck->shuffle();
 
         $lucas = Player::named('Lucas', PlayerId::generate());
         $jeremy = Player::named('Jeremy', PlayerId::generate());
@@ -117,7 +84,6 @@ class WarGameSpec extends ObjectBehavior
         $table->welcome($jeremy);
 
         $this->beConstructedWith($deck, $table);
-        $this->shuffleCards();
         $this->dealCards();
         $this->shouldThrow(CardsAlreadyDealt::class)->during('dealCards');
         $this->getCurrentStatus()->shouldBe(WarGame::STATUS_CARDS_DEALT);
@@ -159,7 +125,6 @@ class WarGameSpec extends ObjectBehavior
         $table->welcome($jeremy);
 
         $this->beConstructedWith($deck, $table);
-        $this->shuffleCards()->shouldReturnAnInstanceOf(WarGame::class);
         $this->dealCards()->shouldReturnAnInstanceOf(WarGame::class);
         $this->play()->shouldReturnAnInstanceOf(WarGame::class);
     }
@@ -201,5 +166,27 @@ class WarGameSpec extends ObjectBehavior
         $this->beConstructedWith($deck, $table);
         $this->dealCards();
         $this->shouldThrow(GameIsNotOver::class)->during('getWinner');
+    }
+
+    function it_returns_a_winner_even_if_players_have_same_rank_cards()
+    {
+        $deck = new Deck([
+            new Card(Rank::ace(), Suit::clubs()),
+            new Card(Rank::ace(), Suit::diamonds()),
+            new Card(Rank::king(), Suit::clubs()),
+            new Card(Rank::king(), Suit::diamonds())
+        ]);
+
+        $lucas = Player::named('Lucas', PlayerId::generate());
+        $jeremy = Player::named('Jeremy', PlayerId::generate());
+
+        $table = new Table();
+        $table->welcome($lucas);
+        $table->welcome($jeremy);
+
+        $this->beConstructedWith($deck, $table);
+        $this->dealCards();
+        $this->play();
+        $this->getWinner()->shouldBeLike($jeremy); // Lucas is the first player to be out of cards
     }
 }

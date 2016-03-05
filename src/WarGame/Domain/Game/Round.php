@@ -159,6 +159,7 @@ final class Round
         $this->putAllCardsFaceDown();
 
         $winner->wins($this->getAllCards());
+
         $this->winner = $winner;
 
         return $winner;
