@@ -19,57 +19,128 @@ Feature: Score the players
       | 10    | diamonds |
     When cards are dealt but not shuffled
     And players play the game
-    Then player 2 loses the game
-    And player 1 wins the game
+    Then player 1 wins the game
     And they played 5 rounds
 
   Scenario: Players play one single war
     Given there are two players around the table
     And there are following cards in the deck:
-      | rank  | suit     | comments             | round |
-      | ace   | clubs    | 1st card of player 2 | 1     |
-      | ace   | diamonds | 1st card of player 1 | 1     |
-      | 3     | clubs    | 2nd card of player 2 | 1     |
-      | king  | diamonds | 2nd card of player 1 | 1     |
-      | 4     | clubs    | 3rd card of player 2 | 1     |
-      | queen | diamonds | 3rd card of player 1 | 1     |
-      | 4     | clubs    | 4th card of player 2 | 1     |
-      | queen | diamonds | 4th card of player 1 | 1     |
-      | 4     | clubs    | 5th card of player 2 | 1     |
-      | queen | diamonds | 5th card of player 1 | 1     |
-      | 4     | clubs    | 6th card of player 2 | 2     |
-      | queen | diamonds | 6th card of player 1 | 2     |
+      | rank  | suit     | comments             |
+      | ace   | clubs    | 1st card of player 2 |
+      | ace   | diamonds | 1st card of player 1 |
+      | x     | x        | 2nd card of player 2 |
+      | x     | x        | 2nd card of player 1 |
+      | x     | x        | 3rd card of player 2 |
+      | x     | x        | 3rd card of player 1 |
+      | x     | x        | 4th card of player 2 |
+      | x     | x        | 4th card of player 1 |
+      | 4     | clubs    | 5th card of player 2 |
+      | queen | diamonds | 5th card of player 1 |
     When cards are dealt but not shuffled
     And players play the game
-    Then player 2 loses the game
-    And player 1 wins the game
-    And they played 2 rounds
+    Then player 1 wins the game
+    And they played 1 rounds
 
+  Scenario: Players play one double war
+    Given there are two players around the table
+    And there are following cards in the deck:
+      | rank | suit     | comments             |
+      | ace  | clubs    | 1st card of player 2 |
+      | ace  | diamonds | 1st card of player 1 |
+      | x    | x        | 2nd card of player 2 |
+      | x    | x        | 2nd card of player 1 |
+      | x    | x        | 3rd card of player 2 |
+      | x    | x        | 3rd card of player 1 |
+      | x    | x        | 4th card of player 2 |
+      | x    | x        | 4th card of player 1 |
+      | 4    | clubs    | 5th card of player 2 |
+      | 4    | diamonds | 5th card of player 1 |
+      | x    | x        | 6th card of player 2 |
+      | x    | x        | 6th card of player 1 |
+      | x    | x        | 7th card of player 2 |
+      | x    | x        | 7th card of player 1 |
+      | x    | x        | 8th card of player 2 |
+      | x    | x        | 8th card of player 1 |
+      | 5    | clubs    | 9th card of player 2 |
+      | 8    | diamonds | 9th card of player 1 |
+    When cards are dealt but not shuffled
+    And players play the game
+    Then player 1 wins the game
+    And they played 1 rounds
 
-
-
-
-
-
-
-
-
-#  Scenario: A player wins 5 wars
-#    Given there are two players around the table
-#    And player 1 has following cards:
-#      | rank | suit   |
-#      | 2    | spades |
-#      | 3    | spades |
-#      | 4    | spades |
-#      | 5    | spades |
-#      | 6    | spades |
-#    And player 2 has following cards:
-#      | rank  | suit   |
-#      | ace   | hearts |
-#      | king  | hearts |
-#      | queen | hearts |
-#      | jack  | hearts |
-#      | 10    | hearts |
-#    When the first round starts
-#    When I lose 5 wars in the game
-#    Then I lose the game
+  Scenario: A player wins 5 wars
+    Given there are two players around the table
+    And there are following cards in the deck:
+      | rank  | suit     | comments                                      |
+      | ace   | clubs    | 1st card of player 2 => 1st war               |
+      | ace   | diamonds | 1st card of player 1                          |
+      | x     | x        | 2nd card of player 2                          |
+      | x     | x        | 2nd card of player 1                          |
+      | x     | x        | 3rd card of player 2                          |
+      | x     | x        | 3rd card of player 1                          |
+      | x     | x        | 4th card of player 2                          |
+      | x     | x        | 4th card of player 1                          |
+      | 8     | clubs    | 5th card of player 2 => player 2 wins the war |
+      | 4     | diamonds | 5th card of player 1                          |
+      | king  | clubs    | 6th card of player 2 => 2nd war               |
+      | king  | diamonds | 6th card of player 1                          |
+      | x     | x        | 7th card of player 2                          |
+      | x     | x        | 7th card of player 1                          |
+      | x     | x        | 8th card of player 2                          |
+      | x     | x        | 8th card of player 1                          |
+      | x     | x        | 9th card of player 2                          |
+      | x     | x        | 9th card of player 1                          |
+      | 8     | clubs    | etc => player 2 wins the war                  |
+      | 4     | diamonds | etc                                           |
+      | queen | clubs    | etc => 3rd war                                |
+      | queen | diamonds | etc                                           |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | 8     | clubs    | => player 2 wins the war                      |
+      | 4     | diamonds |                                               |
+      | jack  | clubs    | 4th war                                       |
+      | jack  | diamonds |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | 8     | clubs    | => player 2 wins the war                      |
+      | 4     | diamonds |                                               |
+      | jack  | clubs    | 5th war                                       |
+      | jack  | diamonds |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | x     | x        |                                               |
+      | 8     | clubs    | => player 2 wins the war                      |
+      | 4     | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+      | 2     | clubs    |                                               |
+      | ace   | diamonds |                                               |
+    When cards are dealt but not shuffled
+    And players play the game
+    Then player 2 wins the game
+    And they played 5 rounds

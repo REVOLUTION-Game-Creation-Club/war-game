@@ -2,4 +2,4 @@
 
 namespace WarGame\Domain\Game;
 
-class BattleCannotTakePlace extends \RuntimeException {}
+final class BattleCannotTakePlace extends \RuntimeException {}

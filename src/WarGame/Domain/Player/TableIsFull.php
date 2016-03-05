@@ -2,4 +2,4 @@
 
 namespace WarGame\Domain\Player;
 
-class TableIsFull extends \RuntimeException {}
+final class TableIsFull extends \RuntimeException {}

@@ -2,4 +2,4 @@
 
 namespace WarGame\Domain\Game;
 
-class CardsAreNotDealt extends \RuntimeException {}
+final class CardsAreNotDealt extends \RuntimeException {}

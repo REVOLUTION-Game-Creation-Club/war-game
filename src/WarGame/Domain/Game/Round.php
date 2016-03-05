@@ -9,11 +9,11 @@ use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
 use WarGame\Domain\Player\Table;
 
-class Round
+final class Round
 {
     const ROUND_IS_IN_WAR = true;
     const ROUND_IS_NOT_IN_WAR = false;
-    const VARIANT_WAR_WITH_3_CARDS = 3;
+    const VARIANT_WAR_WITH_NB_CARDS = 3;
 
     /**
      * @var Card[]
@@ -77,13 +77,13 @@ class Round
 
         if (self::ROUND_IS_IN_WAR === $isInWar) {
             try {
-                $this->playerAddsCardFaceDown($this->table->getPlayer1(), self::VARIANT_WAR_WITH_3_CARDS);
+                $this->playerAddsCardFaceDown($this->table->getPlayer1(), self::VARIANT_WAR_WITH_NB_CARDS);
             } catch (NotEnoughCards $e) {
                 return $this->nominateAndAwardWinner($this->table->getPlayer2());
             }
 
             try {
-                $this->playerAddsCardFaceDown($this->table->getPlayer2(), self::VARIANT_WAR_WITH_3_CARDS);
+                $this->playerAddsCardFaceDown($this->table->getPlayer2(), self::VARIANT_WAR_WITH_NB_CARDS);
             } catch (NotEnoughCards $e) {
                 return $this->nominateAndAwardWinner($this->table->getPlayer1());
             }

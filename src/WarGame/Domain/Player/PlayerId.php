@@ -4,7 +4,7 @@ namespace WarGame\Domain\Player;
 
 use Ramsey\Uuid\Uuid;
 
-class PlayerId
+final class PlayerId
 {
     /**
      * @var Uuid

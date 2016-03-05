@@ -2,4 +2,4 @@
 
 namespace WarGame\Domain\Game;
 
-class GameIsNotOver extends \RuntimeException {}
+final class GameIsNotOver extends \RuntimeException {}

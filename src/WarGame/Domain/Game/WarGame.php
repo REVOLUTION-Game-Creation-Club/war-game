@@ -4,13 +4,15 @@ namespace WarGame\Domain\Game;
 
 use Assert\Assertion;
 use WarGame\Domain\Card\Deck;
+use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\Table;
 
 class WarGame
 {
     const STATUS_STARTED = 10;
-    const STATUS_CARDS_DEALT = 20;
-    const STATUS_GAME_OVER = 30;
+    const STATUS_CARDS_SHUFFLED = 20;
+    const STATUS_CARDS_DEALT = 30;
+    const STATUS_GAME_OVER = 40;
 
     /**
      * Variant of 1 or 3 cards
@@ -18,7 +20,12 @@ class WarGame
     const NB_CARDS_FACE_DOWN = 3;
 
     /**
-     * @var Deck $deck A standard 52-card deck
+     * Number of wars one player has to win to win the game
+     */
+    const MAX_WARS = 5;
+
+    /**
+     * @var Deck $deck A deck of cards
      */
     private $deck;
 
@@ -44,26 +51,45 @@ class WarGame
      */
     private $timesPlayersHaveBeenInWar;
 
+    /**
+     * @var Player
+     */
+    private $winner;
+
     public function __construct(Deck $deck, Table $table)
     {
         Assertion::false($deck->isEmpty(), 'Deck is empty.');
+        Assertion::greaterOrEqualThan($deck->getNbOfCards(), 2, 'Cannot play with less than 2 cards.');
         Assertion::true($table->isFull(), 'Table is not full.');
 
         $this->deck = $deck;
         $this->table = $table;
         $this->rounds = [];
-        $this->currentStatus = self::STATUS_STARTED;
         $this->isCurrentlyInWar = false;
         $this->timesPlayersHaveBeenInWar = [
             $this->table->getPlayer1()->getId()->toString() => 0,
             $this->table->getPlayer2()->getId()->toString() => 0
         ];
+        $this->currentStatus = self::STATUS_STARTED;
     }
 
-    public function dealCards($doShuffle = true)
+    public function shuffleCards()
     {
-        if ($doShuffle) {
-            $this->deck->shuffle();
+        if ($this->currentStatus > self::STATUS_CARDS_SHUFFLED) {
+            throw new CardsAlreadyDealt();
+        }
+
+        $this->deck->shuffle();
+
+        $this->currentStatus = self::STATUS_CARDS_SHUFFLED;
+
+        return $this;
+    }
+
+    public function dealCards()
+    {
+        if ($this->currentStatus >= self::STATUS_CARDS_DEALT) {
+            throw new CardsAlreadyDealt();
         }
 
         while (!$this->deck->isEmpty()) {
@@ -72,12 +98,18 @@ class WarGame
         }
 
         $this->currentStatus = self::STATUS_CARDS_DEALT;
+
+        return $this;
     }
 
     public function play()
     {
         if ($this->currentStatus < self::STATUS_CARDS_DEALT) {
             throw new CardsAreNotDealt();
+        }
+
+        if ($this->currentStatus >= self::STATUS_GAME_OVER) {
+            throw new CannotPlayTwice();
         }
 
         $roundNumber = 1;
@@ -87,28 +119,34 @@ class WarGame
                 $this->rounds[$roundNumber] = new Round($roundNumber, $this->table);
             }
 
-//            var_dump($roundNumber);
-//            var_dump($this->rounds[$roundNumber]);
-//            if ($this->isCurrentlyInWar)
-//            var_dump($this->isCurrentlyInWar);
-
             try {
-//                var_dump('teeest');
                 $this->rounds[$roundNumber]->play($this->isCurrentlyInWar);
+
+                // Player wins a war
+                if (true === $this->isCurrentlyInWar) {
+                    $roundWinner = $this->rounds[$roundNumber]->getWinner();
+
+                    if (self::MAX_WARS === ++$this->timesPlayersHaveBeenInWar[$roundWinner->getId()->toString()]) {
+                        $this->winner = $roundWinner;
+
+                        break;
+                    }
+                }
+
                 $this->isCurrentlyInWar = false;
                 $roundNumber++;
-//                var_dump($winner);
             } catch (War $e) {
                 $this->isCurrentlyInWar = true;
-//                var_dump($this->rounds[$roundNumber]);
 
-//                var_dump('OVER?');
-//                var_dump($this->gameIsOver());
                 continue;
             }
+        } while (!$this->oneOfThePlayersRanOutOfCards());
 
-
-        } while (!$this->gameIsOver());
+        if (null === $this->winner) {
+            $this->winner = $this->table->getPlayer1()->isOutOfCards()
+                ? $this->table->getPlayer2()
+                : $this->table->getPlayer1();
+        }
 
         $this->currentStatus = self::STATUS_GAME_OVER;
 
@@ -120,39 +158,13 @@ class WarGame
         return $this->currentStatus;
     }
 
-//    public function getLoser()
-//    {
-//        if ($this->currentStatus != self::STATUS_GAME_OVER) {
-//            throw new GameIsNotOver();
-//        }
-//
-//        return $this->getWinner()->getId()->sameValueAs($this->table->getPlayer1()->getId())
-//            ? $this->table->getPlayer2()
-//            : $this->table->getPlayer1();
-//    }
-
     public function getWinner()
     {
-        if ($this->currentStatus != self::STATUS_GAME_OVER) {
+        if ($this->currentStatus < self::STATUS_GAME_OVER) {
             throw new GameIsNotOver();
         }
 
-        return $this->table->getPlayer1()->getNbOfCards() === 0 ? $this->table->getPlayer2() : $this->table->getPlayer1();
-    }
-
-    /**
-     * @return bool
-     */
-    private function oneOfThePlayersRanOutOfCards()
-    {
-        return $this->table->getPlayer1()->isOutOfCards() || $this->table->getPlayer2()->isOutOfCards();
-    }
-
-    private function gameIsOver()
-    {
-        return $this->oneOfThePlayersRanOutOfCards();
-//        || $this->table->getPlayer1()->nbWonWars() === 5
-//        || $this->table->getPlayer1()->nbWonWars() === 5;
+        return $this->winner;
     }
 
     /**
@@ -161,5 +173,13 @@ class WarGame
     public function getRounds()
     {
         return $this->rounds;
+    }
+
+    /**
+     * @return bool
+     */
+    private function oneOfThePlayersRanOutOfCards()
+    {
+        return $this->table->getPlayer1()->isOutOfCards() || $this->table->getPlayer2()->isOutOfCards();
     }
 }

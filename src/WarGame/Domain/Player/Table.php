@@ -2,7 +2,7 @@
 
 namespace WarGame\Domain\Player;
 
-class Table
+final class Table
 {
     private $players = [];
 

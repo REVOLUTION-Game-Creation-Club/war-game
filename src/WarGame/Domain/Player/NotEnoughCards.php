@@ -2,4 +2,4 @@
 
 namespace WarGame\Domain\Player;
 
-class NotEnoughCards extends \RuntimeException {}
+final class NotEnoughCards extends \RuntimeException {}
