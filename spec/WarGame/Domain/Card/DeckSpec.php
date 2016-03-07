@@ -24,7 +24,9 @@ class DeckSpec extends ObjectBehavior
     function it_should_shuffle_cards()
     {
         $this->beConstructedThrough('frenchDeck');
+        $cards = $this->getCards();
         $this->shuffle();
+        $this->getCards()->shouldNotBeLike($cards);
     }
 
     function it_should_add_one_card_to_the_top()

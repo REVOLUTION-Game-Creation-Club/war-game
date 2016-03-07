@@ -6,8 +6,6 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use WarGame\Domain\Card\Card;
 use WarGame\Domain\Card\Deck;
-use WarGame\Domain\Card\Rank;
-use WarGame\Domain\Card\Suit;
 use WarGame\Domain\Player\NotEnoughCards;
 use WarGame\Domain\Player\PlayerId;
 

@@ -2,7 +2,6 @@
 
 namespace WarGame\Domain\Player;
 
-use Assert\Assertion;
 use WarGame\Domain\Card\Card;
 use WarGame\Domain\Card\Deck;
 
