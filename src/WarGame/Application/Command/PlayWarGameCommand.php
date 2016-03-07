@@ -54,22 +54,22 @@ class PlayWarGameCommand extends Command
         $warGame->dealCards();
         $warGame->play();
 
-        foreach ($warGame->getRounds() as $roundNumber => $playedRound) {
+        foreach ($warGame->getBattles() as $battleNumber => $playedBattle) {
             $output->writeln(
                 sprintf(
-                    'Round n°%d : %s won %d cards',
-                    $roundNumber,
-                    $playedRound->getWinner()->getName(),
-                    $playedRound->numberOfCardsInTheRound()
+                    'Battle n°%d : %s won %d cards',
+                    $battleNumber,
+                    $playedBattle->getWinner()->getName(),
+                    $playedBattle->numberOfCardsInTheBattle()
                 )
             );
         }
 
         $output->writeln(
             sprintf(
-                '%s won the game in %d rounds',
+                '%s won the game in %d battles',
                 $warGame->getWinner()->getName(),
-                count($warGame->getRounds())
+                count($warGame->getBattles())
             )
         );
     }

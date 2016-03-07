@@ -9,10 +9,10 @@ use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
 use WarGame\Domain\Player\Table;
 
-final class Round
+final class Battle
 {
-    const ROUND_IS_IN_WAR = true;
-    const ROUND_IS_NOT_IN_WAR = false;
+    const BATTLE_IS_IN_WAR = true;
+    const BATTLE_IS_NOT_IN_WAR = false;
     const VARIANT_WAR_WITH_NB_CARDS = 3;
 
     /**
@@ -25,7 +25,7 @@ final class Round
      */
     private $cardsFaceDown;
 
-    private $roundNumber;
+    private $battleNumber;
 
     /**
      * @var Table
@@ -33,18 +33,18 @@ final class Round
     private $table;
 
     /**
-     * @var Player $winner Winner of the round
+     * @var Player $winner Winner of the battle
      */
     private $winner;
 
-    public function __construct($roundNumber, Table $table)
+    public function __construct($battleNumber, Table $table)
     {
-        Assertion::integer($roundNumber, 'Round number should be a number.');
-        Assertion::true($table->isFull(), 'Table has to be full to start a new round.');
+        Assertion::integer($battleNumber, 'Battle number should be a number.');
+        Assertion::true($table->isFull(), 'Table has to be full to start a new battle.');
 
         $this->cardsFaceUp = [];
         $this->cardsFaceDown = [];
-        $this->roundNumber = $roundNumber;
+        $this->battleNumber = $battleNumber;
         $this->table = $table;
     }
 
@@ -69,13 +69,13 @@ final class Round
      *
      * @return Player Winner
      */
-    public function play($isInWar = self::ROUND_IS_NOT_IN_WAR)
+    public function play($isInWar = self::BATTLE_IS_NOT_IN_WAR)
     {
         if ($this->table->getPlayer1()->getNbOfCards() + $this->table->getPlayer2()->getNbOfCards() + count($this->cardsFaceUp) < 2) {
             throw new BattleCannotTakePlace();
         }
 
-        if (self::ROUND_IS_IN_WAR === $isInWar) {
+        if (self::BATTLE_IS_IN_WAR === $isInWar) {
             try {
                 $this->playerAddsCardFaceDown($this->table->getPlayer1(), self::VARIANT_WAR_WITH_NB_CARDS);
             } catch (NotEnoughCards $e) {
@@ -141,7 +141,7 @@ final class Round
         );
     }
 
-    public function numberOfCardsInTheRound()
+    public function numberOfCardsInTheBattle()
     {
         return count($this->cardsFaceUp) + count($this->cardsFaceDown);
     }

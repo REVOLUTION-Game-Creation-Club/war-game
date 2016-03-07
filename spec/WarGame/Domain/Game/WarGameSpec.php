@@ -89,7 +89,7 @@ class WarGameSpec extends ObjectBehavior
         $this->getCurrentStatus()->shouldBe(WarGame::STATUS_CARDS_DEALT);
     }
 
-    function it_plays_a_round_when_cards_are_dealt_and_returns_the_winner()
+    function it_plays_a_battle_when_cards_are_dealt_and_returns_the_winner()
     {
         $deck = new Deck([
             new Card(Rank::ace(), Suit::clubs()),

@@ -34,9 +34,9 @@ class WarGame
     private $table;
 
     /**
-     * @var Round[] $rounds Rounds
+     * @var Battle[] $battles Battles
      */
-    private $rounds;
+    private $battles;
 
     private $currentStatus;
 
@@ -63,7 +63,7 @@ class WarGame
 
         $this->deck = $deck;
         $this->table = $table;
-        $this->rounds = [];
+        $this->battles = [];
         $this->isCurrentlyInWar = false;
         $this->timesPlayersHaveBeenInWar = [
             $this->table->getPlayer1()->getId()->toString() => 0,
@@ -98,30 +98,30 @@ class WarGame
             throw new CannotPlayTwice();
         }
 
-        $roundNumber = 1;
+        $battleNumber = 1;
 
         do {
 
             if (false === $this->isCurrentlyInWar) {
-                $this->rounds[$roundNumber] = new Round($roundNumber, $this->table);
+                $this->battles[$battleNumber] = new Battle($battleNumber, $this->table);
             }
 
             try {
-                $this->rounds[$roundNumber]->play($this->isCurrentlyInWar);
+                $this->battles[$battleNumber]->play($this->isCurrentlyInWar);
 
                 // Player wins a war
                 if (true === $this->isCurrentlyInWar) {
-                    $roundWinner = $this->rounds[$roundNumber]->getWinner();
+                    $battleWinner = $this->battles[$battleNumber]->getWinner();
 
-                    if (self::MAX_WARS === ++$this->timesPlayersHaveBeenInWar[$roundWinner->getId()->toString()]) {
-                        $this->winner = $roundWinner;
+                    if (self::MAX_WARS === ++$this->timesPlayersHaveBeenInWar[$battleWinner->getId()->toString()]) {
+                        $this->winner = $battleWinner;
 
                         break;
                     }
                 }
 
                 $this->isCurrentlyInWar = false;
-                $roundNumber++;
+                $battleNumber++;
             } catch (War $e) {
                 $this->isCurrentlyInWar = true;
 
@@ -155,11 +155,11 @@ class WarGame
     }
 
     /**
-     * @return Round[]
+     * @return Battle[]
      */
-    public function getRounds()
+    public function getBattles()
     {
-        return $this->rounds;
+        return $this->battles;
     }
 
     /**

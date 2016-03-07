@@ -11,9 +11,9 @@ Feature: Play the battles
     And player 2 receives following cards:
       | rank | suit  |
       | 5    | clubs |
-    When the first round starts
-    And players finish to play the round
-    Then player 1 wins all 2 cards of the round and puts them, face down, on the bottom of his stack
+    When the first battle starts
+    And players finish to play the battle
+    Then player 1 wins all 2 cards of the battle and puts them, face down, on the bottom of his stack
 
   Scenario: Single war
     Given there are two players around the table
@@ -31,10 +31,10 @@ Feature: Play the battles
       | x    |        |
       | x    |        |
       | 8    | hearts |
-    When the first round starts
+    When the first battle starts
     And it's war
-    And players finish to play the war round
-    Then player 2 wins all 10 cards of the round and puts them, face down, on the bottom of his stack
+    And players finish to play the war battle
+    Then player 2 wins all 10 cards of the battle and puts them, face down, on the bottom of his stack
 
   Scenario: Double war
     Given there are two players around the table
@@ -60,8 +60,8 @@ Feature: Play the battles
       | x    |        |
       | x    |        |
       | 8    | hearts |
-    When the first round starts
+    When the first battle starts
     And it's war
     And it's double war
-    And players finish to play the war round
-    Then player 1 wins all 18 cards of the round and puts them, face down, on the bottom of his stack
+    And players finish to play the war battle
+    Then player 1 wins all 18 cards of the battle and puts them, face down, on the bottom of his stack

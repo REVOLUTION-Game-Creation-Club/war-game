@@ -20,7 +20,7 @@ Feature: Score the players
     When cards are dealt but not shuffled
     And players play the game
     Then player 1 wins the game
-    And they played 5 rounds
+    And they played 5 battles
 
   Scenario: Players play one single war
     Given there are two players around the table
@@ -39,7 +39,7 @@ Feature: Score the players
     When cards are dealt but not shuffled
     And players play the game
     Then player 1 wins the game
-    And they played 1 rounds
+    And they played 1 battles
 
   Scenario: Players play one double war
     Given there are two players around the table
@@ -66,7 +66,7 @@ Feature: Score the players
     When cards are dealt but not shuffled
     And players play the game
     Then player 1 wins the game
-    And they played 1 rounds
+    And they played 1 battles
 
   Scenario: A player wins 5 wars
     Given there are two players around the table
@@ -143,4 +143,4 @@ Feature: Score the players
     When cards are dealt but not shuffled
     And players play the game
     Then player 2 wins the game
-    And they played 5 rounds
+    And they played 5 battles

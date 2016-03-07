@@ -12,7 +12,7 @@ use WarGame\Domain\Card\Card;
 use WarGame\Domain\Card\Deck;
 use WarGame\Domain\Card\Rank;
 use WarGame\Domain\Card\Suit;
-use WarGame\Domain\Game\Round;
+use WarGame\Domain\Game\Battle;
 use WarGame\Domain\Game\War;
 use WarGame\Domain\Game\WarGame;
 use WarGame\Domain\Player\Player;
@@ -35,9 +35,9 @@ class DomainContext implements Context, SnippetAcceptingContext
     private $warGame;
 
     /**
-     * @var Round
+     * @var Battle
      */
-    private $round;
+    private $battle;
 
     /**
      * @var Table
@@ -47,7 +47,7 @@ class DomainContext implements Context, SnippetAcceptingContext
     /**
      * @var Player
      */
-    private $currentRoundWinner;
+    private $currentBattleWinner;
 
     /**
      * Initializes context.
@@ -131,11 +131,11 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When the first round starts
+     * @When the first battle starts
      */
-    public function theFirstRoundStarts()
+    public function theFirstBattleStarts()
     {
-        $this->round = new Round(1, $this->table);
+        $this->battle = new Battle(1, $this->table);
     }
 
     /**
@@ -144,10 +144,10 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function followingCardsShouldBeOnTheTable(TableNode $cards)
     {
         try {
-            $this->round->play();
+            $this->battle->play();
         } catch (War $e) {}
 
-        $cardsOnTheTable = $this->round->getAllCards();
+        $cardsOnTheTable = $this->battle->getAllCards();
 
         foreach ($cards as $card) {
             $rankValue = $card['rank'];
@@ -192,20 +192,20 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When players finish to play the round
+     * @When players finish to play the battle
      */
-    public function playersFinishToPlayTheRound()
+    public function playersFinishToPlayTheBattle()
     {
-        $this->currentRoundWinner = $this->round->play();
+        $this->currentBattleWinner = $this->battle->play();
     }
 
     /**
-     * @When players finish to play the war round
+     * @When players finish to play the war battle
      */
-    public function playersFinishToPlayTheWarRound()
+    public function playersFinishToPlayTheWarBattle()
     {
         try {
-            $this->currentRoundWinner = $this->round->play(Round::ROUND_IS_IN_WAR);
+            $this->currentBattleWinner = $this->battle->play(Battle::BATTLE_IS_IN_WAR);
         } catch (War $e) {}
     }
 
@@ -215,7 +215,7 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function itSWar()
     {
         try {
-            $this->currentRoundWinner = $this->round->play();
+            $this->currentBattleWinner = $this->battle->play();
 
             Assert::fail('Players are not in war.');
         } catch (War $e) {}
@@ -227,20 +227,20 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function itSDoubleWar()
     {
         try {
-            $this->currentRoundWinner = $this->round->play(Round::ROUND_IS_IN_WAR);
+            $this->currentBattleWinner = $this->battle->play(Battle::BATTLE_IS_IN_WAR);
 
             Assert::fail('Players are not in double war.');
         } catch (War $e) {}
     }
 
     /**
-     * @Then player :playerNumber wins all :numberOfCards cards of the round and puts them, face down, on the bottom of his stack
+     * @Then player :playerNumber wins all :numberOfCards cards of the battle and puts them, face down, on the bottom of his stack
      */
-    public function playerWinsAllCardsOfTheRoundAndPutsThemFaceDownOnTheBottomOfHisStack($playerNumber, $numberOfCards)
+    public function playerWinsAllCardsOfTheBattleAndPutsThemFaceDownOnTheBottomOfHisStack($playerNumber, $numberOfCards)
     {
-        Assert::assertSame(intval($numberOfCards), $this->round->numberOfCardsInTheRound());
-        Assert::assertSame($this->currentRoundWinner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
-        Assert::assertSame($this->currentRoundWinner->getNbOfCards(), intval($numberOfCards));
+        Assert::assertSame(intval($numberOfCards), $this->battle->numberOfCardsInTheBattle());
+        Assert::assertSame($this->currentBattleWinner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
+        Assert::assertSame($this->currentBattleWinner->getNbOfCards(), intval($numberOfCards));
     }
 
     /**
@@ -297,10 +297,10 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then they played :nbOfRounds rounds
+     * @Then they played :nbOfBattles battles
      */
-    public function theyPlayedRounds($nbOfRounds)
+    public function theyPlayedBattles($nbOfBattles)
     {
-        Assert::assertSame(count($this->warGame->getRounds()), intval($nbOfRounds));
+        Assert::assertSame(count($this->warGame->getBattles()), intval($nbOfBattles));
     }
 }

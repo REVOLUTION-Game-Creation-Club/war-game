@@ -50,7 +50,7 @@ Feature: Deal cards
       | rank  | suit   |
       | 5     | clubs  |
       | queen | spades |
-    When the first round starts
+    When the first battle starts
     Then following cards should be on the table:
       | rank  | suit   |
       | king  | hearts |

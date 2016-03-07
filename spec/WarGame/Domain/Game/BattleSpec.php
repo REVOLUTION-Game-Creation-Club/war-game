@@ -8,13 +8,13 @@ use WarGame\Domain\Card\Card;
 use WarGame\Domain\Card\Rank;
 use WarGame\Domain\Card\Suit;
 use WarGame\Domain\Game\BattleCannotTakePlace;
-use WarGame\Domain\Game\Round;
+use WarGame\Domain\Game\Battle;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
 use WarGame\Domain\Game\War;
 use WarGame\Domain\Player\Table;
 
-class RoundSpec extends ObjectBehavior
+class BattleSpec extends ObjectBehavior
 {
     function it_doesnt_start_if_table_in_not_full()
     {
@@ -27,7 +27,7 @@ class RoundSpec extends ObjectBehavior
         $table->welcome(Player::named('Jeremy', PlayerId::generate()));
 
         $this->beConstructedWith(1, $table);
-        $this->shouldHaveType('WarGame\Domain\Game\Round');
+        $this->shouldHaveType('WarGame\Domain\Game\Battle');
     }
 
     function it_resolves_the_winner_with_one_higher_card()
@@ -83,12 +83,12 @@ class RoundSpec extends ObjectBehavior
         $table->welcome($player2);
 
         $this->beConstructedWith(1, $table);
-        $this->shouldThrow(War::class)->during('play', [Round::ROUND_IS_IN_WAR]);
+        $this->shouldThrow(War::class)->during('play', [Battle::BATTLE_IS_IN_WAR]);
 
-        $this->numberOfCardsInTheRound()->shouldBe(8);
+        $this->numberOfCardsInTheBattle()->shouldBe(8);
     }
 
-    function it_returns_played_cards_in_the_round()
+    function it_returns_played_cards_in_the_battle()
     {
         $table = new Table();
         $player1 = Player::named('Lucas', PlayerId::generate());
@@ -101,10 +101,10 @@ class RoundSpec extends ObjectBehavior
 
         $this->beConstructedWith(1, $table);
         $this->getAllCards()->shouldHaveCount(0);
-        $this->numberOfCardsInTheRound()->shouldBe(0);
+        $this->numberOfCardsInTheBattle()->shouldBe(0);
         $this->play();
         $this->getAllCards()->shouldHaveCount(2);
-        $this->numberOfCardsInTheRound()->shouldBe(2);
+        $this->numberOfCardsInTheBattle()->shouldBe(2);
     }
 
     function it_should_detect_wars()
@@ -120,7 +120,7 @@ class RoundSpec extends ObjectBehavior
 
         $this->beConstructedWith(1, $table);
         $this->shouldThrow(War::class)->during('play');
-        $this->numberOfCardsInTheRound()->shouldBe(2);
+        $this->numberOfCardsInTheBattle()->shouldBe(2);
     }
 
     function it_should_detect_double_wars_and_return_won_cards()
@@ -144,9 +144,9 @@ class RoundSpec extends ObjectBehavior
 
         $this->beConstructedWith(1, $table);
         $this->shouldThrow(War::class)->during('play');
-        $this->numberOfCardsInTheRound()->shouldBe(2);
-        $this->shouldThrow(War::class)->during('play', [Round::ROUND_IS_IN_WAR]);
-        $this->numberOfCardsInTheRound()->shouldBe(10);
+        $this->numberOfCardsInTheBattle()->shouldBe(2);
+        $this->shouldThrow(War::class)->during('play', [Battle::BATTLE_IS_IN_WAR]);
+        $this->numberOfCardsInTheBattle()->shouldBe(10);
     }
 
     function it_detects_if_player_ran_out_of_cards_during_normal_battle()
@@ -162,7 +162,7 @@ class RoundSpec extends ObjectBehavior
 
         $this->beConstructedWith(1, $table);
         $this->play();
-        $this->numberOfCardsInTheRound()->shouldBe(1);
+        $this->numberOfCardsInTheBattle()->shouldBe(1);
         $this->getWinner()->shouldBeLike($player1);
     }
 
@@ -181,8 +181,8 @@ class RoundSpec extends ObjectBehavior
         $table->welcome($player2);
 
         $this->beConstructedWith(1, $table);
-        $this->play(Round::ROUND_IS_IN_WAR);
-        $this->numberOfCardsInTheRound()->shouldBe(1);
+        $this->play(Battle::BATTLE_IS_IN_WAR);
+        $this->numberOfCardsInTheBattle()->shouldBe(1);
         $this->getWinner()->shouldBeLike($player2);
     }
 
@@ -203,8 +203,8 @@ class RoundSpec extends ObjectBehavior
         $table->welcome($player2);
 
         $this->beConstructedWith(1, $table);
-        $this->play(Round::ROUND_IS_IN_WAR);
-        $this->numberOfCardsInTheRound()->shouldBe(7);
+        $this->play(Battle::BATTLE_IS_IN_WAR);
+        $this->numberOfCardsInTheBattle()->shouldBe(7);
         $this->getWinner()->shouldBeLike($player1);
     }
 
@@ -221,8 +221,8 @@ class RoundSpec extends ObjectBehavior
         $table->welcome($player2);
 
         $this->beConstructedWith(1, $table);
-        $this->play(Round::ROUND_IS_IN_WAR);
-        $this->numberOfCardsInTheRound()->shouldBe(2);
+        $this->play(Battle::BATTLE_IS_IN_WAR);
+        $this->numberOfCardsInTheBattle()->shouldBe(2);
         $this->getWinner()->shouldBeLike($player2);
     }
 }
