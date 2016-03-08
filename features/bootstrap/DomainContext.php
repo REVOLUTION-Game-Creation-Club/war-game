@@ -234,9 +234,9 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then player :playerNumber wins all :numberOfCards cards of the battle and puts them, face down, on the bottom of his stack
+     * @Then player :playerNumber wins all :numberOfCards cards of the battle
      */
-    public function playerWinsAllCardsOfTheBattleAndPutsThemFaceDownOnTheBottomOfHisStack($playerNumber, $numberOfCards)
+    public function playerWinsAllCardsOfTheBattle($playerNumber, $numberOfCards)
     {
         Assert::assertSame(intval($numberOfCards), $this->battle->numberOfCardsInTheBattle());
         Assert::assertSame($this->currentBattleWinner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
@@ -273,7 +273,7 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function cardsAreDealtButNotShuffled()
     {
         $this->warGame = new WarGame($this->deck, $this->table);
-        $this->warGame->dealCards(false);
+        $this->warGame->dealCards();
     }
 
     /**

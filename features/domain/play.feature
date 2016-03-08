@@ -3,9 +3,11 @@ Feature: Play the battles
   As a player
   I need to win battles one by one
 
-  Scenario: One of the two cards is higher than the other
+  Background:
     Given there are two players around the table
-    And player 1 receives following cards:
+
+  Scenario: One of the two cards is higher than the other
+    Given player 1 receives following cards:
       | rank | suit  |
       | 7    | clubs |
     And player 2 receives following cards:
@@ -13,11 +15,10 @@ Feature: Play the battles
       | 5    | clubs |
     When the first battle starts
     And players finish to play the battle
-    Then player 1 wins all 2 cards of the battle and puts them, face down, on the bottom of his stack
+    Then player 1 wins all 2 cards of the battle
 
   Scenario: Single war
-    Given there are two players around the table
-    And player 1 receives following cards:
+    Given player 1 receives following cards:
       | rank | suit   |
       | 3    | spades |
       | x    |        |
@@ -34,11 +35,10 @@ Feature: Play the battles
     When the first battle starts
     And it's war
     And players finish to play the war battle
-    Then player 2 wins all 10 cards of the battle and puts them, face down, on the bottom of his stack
+    Then player 2 wins all 10 cards of the battle
 
   Scenario: Double war
-    Given there are two players around the table
-    And player 1 receives following cards:
+    Given player 1 receives following cards:
       | rank | suit   |
       | ace  | hearts |
       | x    |        |
@@ -64,4 +64,4 @@ Feature: Play the battles
     And it's war
     And it's double war
     And players finish to play the war battle
-    Then player 1 wins all 18 cards of the battle and puts them, face down, on the bottom of his stack
+    Then player 1 wins all 18 cards of the battle
