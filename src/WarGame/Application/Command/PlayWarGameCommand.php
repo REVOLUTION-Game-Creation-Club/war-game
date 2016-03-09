@@ -69,8 +69,8 @@ class PlayWarGameCommand extends Command
                 $nbBattle,
                 $playedBattle->getWinner()->getName(),
                 $playedBattle->numberOfCardsInTheBattle(),
-                sprintf('%d cards', $player1->getDeck()->getNbOfCards()),
-                sprintf('%d cards', $player2->getDeck()->getNbOfCards())
+                sprintf('%d cards', $player1->getNbOfCards()),
+                sprintf('%d cards', $player2->getNbOfCards())
             ]);
         }
 
