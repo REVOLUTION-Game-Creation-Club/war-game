@@ -9,6 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use WarGame\Domain\Card\Deck;
 use WarGame\Domain\Game\WarGame;
+use WarGame\Domain\Player\Dealer;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
 use WarGame\Domain\Player\Table;
@@ -30,8 +31,6 @@ class PlayWarGameCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $table = new Table();
-
         if ($input->getOption('anonymous')) {
             $nameOfPlayer1 = 'Player 1';
             $nameOfPlayer2 = 'Player 2';
@@ -40,6 +39,8 @@ class PlayWarGameCommand extends Command
             $nameOfPlayer1 = $questionHelper->ask($input, $output, new Question('Who is the first player? > ', 'Player 1'));
             $nameOfPlayer2 = $questionHelper->ask($input, $output, new Question('Who is the second player? > ', 'Player 2'));
         }
+
+        $table = new Table();
 
         $player1 = Player::named($nameOfPlayer1, PlayerId::generate());
         $table->welcome($player1);
@@ -50,9 +51,10 @@ class PlayWarGameCommand extends Command
         $deck = Deck::frenchDeck();
         $deck->shuffle();
 
-        $warGame = new WarGame($deck, $table);
-        $warGame->dealCards();
-        $warGame->play();
+        $dealer = new Dealer($deck, $table);
+        $dealer->dealCardsOneByOne();
+
+        $warGame = new WarGame($table);
 
         foreach ($warGame->getBattles() as $battleNumber => $playedBattle) {
             $output->writeln(

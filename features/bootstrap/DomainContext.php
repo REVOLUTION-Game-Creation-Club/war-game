@@ -15,6 +15,7 @@ use WarGame\Domain\Card\Suit;
 use WarGame\Domain\Game\Battle;
 use WarGame\Domain\Game\War;
 use WarGame\Domain\Game\WarGame;
+use WarGame\Domain\Player\Dealer;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
 use WarGame\Domain\Player\Table;
@@ -49,6 +50,8 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     private $currentBattleWinner;
 
+    private $nbOfWarsDuringBattle = 0;
+
     /**
      * Initializes context.
      *
@@ -59,6 +62,8 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function __construct()
     {
     }
+
+    // ===== DEAL ===== //
 
     /**
      * @Given there is a french deck of 52 cards
@@ -93,10 +98,8 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function iDealAllTheCardsFaceDownOneAtATime()
     {
-        while (!$this->deck->isEmpty()) {
-            $this->table->getPlayer1()->receiveCard($this->deck->pickFromTheTop());
-            $this->table->getPlayer2()->receiveCard($this->deck->pickFromTheTop());
-        }
+        $dealer = new Dealer($this->deck, $this->table);
+        $dealer->dealCardsOneByOne();
     }
 
     /**
@@ -109,12 +112,10 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then player :playerNumber should have following cards:
+     * @Then player :player should have following cards:
      */
-    public function playerShouldHaveFollowingCards($playerNumber, TableNode $cards)
+    public function playerShouldHaveFollowingCards(Player $player, TableNode $cards)
     {
-        $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
-
         $cardsOfThePlayer = $player->getDeck()->getCards();
 
         foreach ($cards as $id => $card) {
@@ -131,22 +132,10 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When the first battle starts
-     */
-    public function theFirstBattleStarts()
-    {
-        $this->battle = new Battle(1, $this->table);
-    }
-
-    /**
      * @Then following cards should be on the table:
      */
     public function followingCardsShouldBeOnTheTable(TableNode $cards)
     {
-        try {
-            $this->battle->play();
-        } catch (War $e) {}
-
         $cardsOnTheTable = $this->battle->getAllCards();
 
         foreach ($cards as $card) {
@@ -157,6 +146,7 @@ class DomainContext implements Context, SnippetAcceptingContext
             $suit = Suit::$suitValue();
 
             $expectedCard = new Card($rank, $suit);
+
             foreach ($cardsOnTheTable as $cardOnTheTable) {
                 if ($cardOnTheTable->isEquals($expectedCard)) {
                     continue 2;
@@ -167,13 +157,31 @@ class DomainContext implements Context, SnippetAcceptingContext
         }
     }
 
-    /**
-     * @Given player :playerNumber receives following cards:
-     */
-    public function playerReceivesFollowingCards($playerNumber, TableNode $cards)
-    {
-        $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
+    // ===== PLAY ===== //
 
+    /**
+     * @When players play a battle
+     */
+    public function playersPlayABattle($isInWar = Battle::BATTLE_IS_NOT_IN_WAR)
+    {
+        if (!$this->battle) {
+            $this->battle = new Battle(1, $this->table);
+        }
+
+        try {
+            $this->currentBattleWinner = $this->battle->play($isInWar);
+        } catch (War $e) {
+            $this->nbOfWarsDuringBattle++;
+
+            $this->playersPlayABattle(Battle::BATTLE_IS_IN_WAR);
+        }
+    }
+
+    /**
+     * @Given player :player receives following cards:
+     */
+    public function playerReceivesFollowingCards(Player $player, TableNode $cards)
+    {
         foreach ($cards as $card) {
             $rankValue = $card['rank'];
             $suitValue = strtolower($card['suit']);
@@ -192,56 +200,25 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When players finish to play the battle
+     * @Then there was/were :nbOfWars war(s)
+     *
      */
-    public function playersFinishToPlayTheBattle()
+    public function thereWasWar($nbOfWars)
     {
-        $this->currentBattleWinner = $this->battle->play();
+        Assert::assertSame(intval($nbOfWars), $this->nbOfWarsDuringBattle);
     }
 
     /**
-     * @When players finish to play the war battle
+     * @Then player :player wins all :numberOfCards cards of the battle
      */
-    public function playersFinishToPlayTheWarBattle()
-    {
-        try {
-            $this->currentBattleWinner = $this->battle->play(Battle::BATTLE_IS_IN_WAR);
-        } catch (War $e) {}
-    }
-
-    /**
-     * @Then it's war
-     */
-    public function itSWar()
-    {
-        try {
-            $this->currentBattleWinner = $this->battle->play();
-
-            Assert::fail('Players are not in war.');
-        } catch (War $e) {}
-    }
-
-    /**
-     * @When it's double war
-     */
-    public function itSDoubleWar()
-    {
-        try {
-            $this->currentBattleWinner = $this->battle->play(Battle::BATTLE_IS_IN_WAR);
-
-            Assert::fail('Players are not in double war.');
-        } catch (War $e) {}
-    }
-
-    /**
-     * @Then player :playerNumber wins all :numberOfCards cards of the battle
-     */
-    public function playerWinsAllCardsOfTheBattle($playerNumber, $numberOfCards)
+    public function playerWinsAllCardsOfTheBattle(Player $player, $numberOfCards)
     {
         Assert::assertSame(intval($numberOfCards), $this->battle->numberOfCardsInTheBattle());
-        Assert::assertSame($this->currentBattleWinner, intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2());
+        Assert::assertSame($this->currentBattleWinner, $player);
         Assert::assertSame($this->currentBattleWinner->getNbOfCards(), intval($numberOfCards));
     }
+
+    // ===== SCORE ===== //
 
     /**
      * @Given there are following cards in the deck:
@@ -268,12 +245,11 @@ class DomainContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When cards are dealt but not shuffled
+     * @When cards are dealt
      */
-    public function cardsAreDealtButNotShuffled()
+    public function cardsAreDealt()
     {
-        $this->warGame = new WarGame($this->deck, $this->table);
-        $this->warGame->dealCards();
+        $this->iDealAllTheCardsFaceDownOneAtATime();
     }
 
     /**
@@ -281,19 +257,15 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function playersPlayTheGame()
     {
-        $this->warGame->play();
+        $this->warGame = new WarGame($this->table);
     }
 
     /**
-     * @Then player :playerNumber wins the game
+     * @Then player :player wins the game
      */
-    public function playerWinsTheGame($playerNumber)
+    public function playerWinsTheGame(Player $player)
     {
-        $player = intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
-        $otherPlayer = intval($playerNumber) === 2 ? $this->table->getPlayer1() : $this->table->getPlayer2();
-
         Assert::assertTrue($this->warGame->getWinner()->getId()->sameValueAs($player->getId()));
-        Assert::assertNotTrue($this->warGame->getWinner()->getId()->sameValueAs($otherPlayer->getId()));
     }
 
     /**
@@ -302,5 +274,14 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function theyPlayedBattles($nbOfBattles)
     {
         Assert::assertSame(count($this->warGame->getBattles()), intval($nbOfBattles));
+    }
+
+    // ===== TRANSFORM ===== //
+    /**
+     * @Transform :player
+     */
+    public function castPlayerNumberToPlayer($playerNumber)
+    {
+        return intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
     }
 }

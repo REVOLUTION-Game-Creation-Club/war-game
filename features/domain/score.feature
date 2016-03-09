@@ -3,9 +3,11 @@ Feature: Score the players
   As a judge
   I need to nominate the winner
 
-  Scenario: One of the players has higher cards
+  Background:
     Given there are two players around the table
-    And there are following cards in the deck:
+
+  Scenario: One of the players has higher cards
+    Given there are following cards in the deck:
       | rank  | suit     |
       | 2     | clubs    |
       | ace   | diamonds |
@@ -17,14 +19,13 @@ Feature: Score the players
       | jack  | diamonds |
       | 6     | clubs    |
       | 10    | diamonds |
-    When cards are dealt but not shuffled
+    When cards are dealt
     And players play the game
     Then player 1 wins the game
     And they played 5 battles
 
   Scenario: Players play one single war
-    Given there are two players around the table
-    And there are following cards in the deck:
+    Given there are following cards in the deck:
       | rank  | suit     | comments             |
       | ace   | clubs    | 1st card of player 2 |
       | ace   | diamonds | 1st card of player 1 |
@@ -36,14 +37,13 @@ Feature: Score the players
       | x     | x        | 4th card of player 1 |
       | 4     | clubs    | 5th card of player 2 |
       | queen | diamonds | 5th card of player 1 |
-    When cards are dealt but not shuffled
+    When cards are dealt
     And players play the game
     Then player 1 wins the game
     And they played 1 battles
 
   Scenario: Players play one double war
-    Given there are two players around the table
-    And there are following cards in the deck:
+    Given there are following cards in the deck:
       | rank | suit     | comments             |
       | ace  | clubs    | 1st card of player 2 |
       | ace  | diamonds | 1st card of player 1 |
@@ -63,14 +63,13 @@ Feature: Score the players
       | x    | x        | 8th card of player 1 |
       | 5    | clubs    | 9th card of player 2 |
       | 8    | diamonds | 9th card of player 1 |
-    When cards are dealt but not shuffled
+    When cards are dealt
     And players play the game
     Then player 1 wins the game
     And they played 1 battles
 
   Scenario: A player wins 5 wars
-    Given there are two players around the table
-    And there are following cards in the deck:
+    Given there are following cards in the deck:
       | rank  | suit     | comments                                      |
       | ace   | clubs    | 1st card of player 2 => 1st war               |
       | ace   | diamonds | 1st card of player 1                          |
@@ -140,7 +139,7 @@ Feature: Score the players
       | ace   | diamonds |                                               |
       | 2     | clubs    |                                               |
       | ace   | diamonds |                                               |
-    When cards are dealt but not shuffled
+    When cards are dealt
     And players play the game
     Then player 2 wins the game
     And they played 5 battles

@@ -13,8 +13,7 @@ Feature: Play the battles
     And player 2 receives following cards:
       | rank | suit  |
       | 5    | clubs |
-    When the first battle starts
-    And players finish to play the battle
+    When players play a battle
     Then player 1 wins all 2 cards of the battle
 
   Scenario: Single war
@@ -32,10 +31,9 @@ Feature: Play the battles
       | x    |        |
       | x    |        |
       | 8    | hearts |
-    When the first battle starts
-    And it's war
-    And players finish to play the war battle
+    When players play a battle
     Then player 2 wins all 10 cards of the battle
+    And there was 1 war
 
   Scenario: Double war
     Given player 1 receives following cards:
@@ -60,8 +58,6 @@ Feature: Play the battles
       | x    |        |
       | x    |        |
       | 8    | hearts |
-    When the first battle starts
-    And it's war
-    And it's double war
-    And players finish to play the war battle
+    When players play a battle
     Then player 1 wins all 18 cards of the battle
+    And there were 2 wars
