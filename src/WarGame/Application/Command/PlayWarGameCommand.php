@@ -3,6 +3,9 @@
 namespace WarGame\Application\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -50,23 +53,35 @@ class PlayWarGameCommand extends Command
 
         $warGame = new WarGame($player1, $player2);
 
-        foreach ($warGame->getBattles() as $battleNumber => $playedBattle) {
-            $output->writeln(
-                sprintf(
-                    'Battle n°%d : %s won %d cards',
-                    $battleNumber,
-                    $playedBattle->getWinner()->getName(),
-                    $playedBattle->numberOfCardsInTheBattle()
-                )
-            );
+        $table = new Table($output);
+        $table->setHeaders(array('Battle n°', 'Winner', 'Won cards', $player1->getName(), $player2->getName()));
+        $table->addRow([
+            0, null, null, sprintf('%d cards', $player1->getNbOfCards()), sprintf('%d cards', $player2->getNbOfCards())
+        ]);
+
+        $nbBattle = 0;
+
+        while (!$warGame->hasWinner()) {
+            $nbBattle++;
+            $playedBattle = $warGame->playBattle();
+
+            $table->addRow([
+                $nbBattle,
+                $playedBattle->getWinner()->getName(),
+                $playedBattle->numberOfCardsInTheBattle(),
+                sprintf('%d cards', $player1->getDeck()->getNbOfCards()),
+                sprintf('%d cards', $player2->getDeck()->getNbOfCards())
+            ]);
         }
 
-        $output->writeln(
-            sprintf(
-                '%s won the game in %d battles',
-                $warGame->getWinner()->getName(),
-                count($warGame->getBattles())
-            )
-        );
+        $table->addRows([
+            new TableSeparator(),
+            [new TableCell(
+                sprintf('%s won the game in %d battles', $warGame->getWinner()->getName(), $nbBattle),
+                ['colspan' => 5]
+            )]
+        ]);
+
+        $table->render();
     }
 }

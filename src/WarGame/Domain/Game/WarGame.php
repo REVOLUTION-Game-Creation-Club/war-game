@@ -33,16 +33,6 @@ class WarGame
     private $winner;
 
     /**
-     * @var Battle[] $battles Battles
-     */
-    private $battles;
-
-    /**
-     * @var bool
-     */
-    private $isCurrentlyInWar;
-
-    /**
      * @var array
      */
     private $timesPlayersHaveBeenInWar;
@@ -54,14 +44,18 @@ class WarGame
 
         $this->player1 = $player1;
         $this->player2 = $player2;
-        $this->battles = [];
-        $this->isCurrentlyInWar = false;
         $this->timesPlayersHaveBeenInWar = [
             $this->player1->getId()->toString() => 0,
             $this->player2->getId()->toString() => 0
         ];
+    }
 
-        $this->play();
+    /**
+     * @return bool
+     */
+    public function hasWinner()
+    {
+        return null !== $this->winner;
     }
 
     /**
@@ -73,57 +67,43 @@ class WarGame
     }
 
     /**
-     * @return Battle[]
+     * @return Battle
      */
-    public function getBattles()
+    public function playBattle()
     {
-        return $this->battles;
-    }
+        if ($this->hasWinner()) {
+            throw new GameIsOver();
+        }
 
-    private function play()
-    {
-        $battleNumber = 1;
+        $currentBattle = new Battle($this->player1, $this->player2);
+        $isCurrentlyInWar = Battle::IS_NOT_IN_WAR;
 
         do {
-            if (false === $this->isCurrentlyInWar) {
-                $this->battles[$battleNumber] = new Battle($this->player1, $this->player2);
-            }
-
             try {
-                $this->battles[$battleNumber]->play($this->isCurrentlyInWar);
+                // May throw War
+                $currentBattle->play($isCurrentlyInWar);
 
                 // Player wins a war
-                if (true === $this->isCurrentlyInWar) {
-                    $battleWinner = $this->battles[$battleNumber]->getWinner();
+                if (Battle::IS_IN_WAR === $isCurrentlyInWar) {
+                    $isCurrentlyInWar = Battle::IS_NOT_IN_WAR;
+
+                    $battleWinner = $currentBattle->getWinner();
 
                     if (self::MAX_WARS === ++$this->timesPlayersHaveBeenInWar[$battleWinner->getId()->toString()]) {
                         $this->winner = $battleWinner;
 
-                        break;
+                        return $currentBattle;
                     }
                 }
-
-                $this->isCurrentlyInWar = false;
-                $battleNumber++;
             } catch (War $e) {
-                $this->isCurrentlyInWar = true;
-
-                continue;
+                $isCurrentlyInWar = Battle::IS_IN_WAR;
             }
-        } while ($this->isCurrentlyInWar || !$this->oneOfThePlayersRanOutOfCards());
+        } while (Battle::IS_IN_WAR === $isCurrentlyInWar);
 
-        if (null === $this->winner) {
-            $this->winner = $this->player1->isOutOfCards()
-                ? $this->player2
-                : $this->player1;
+        if ($this->player1->isOutOfCards() || $this->player2->isOutOfCards()) {
+            $this->winner = $this->player1->isOutOfCards() ? $this->player2 : $this->player1;
         }
-    }
 
-    /**
-     * @return bool
-     */
-    private function oneOfThePlayersRanOutOfCards()
-    {
-        return $this->player1->isOutOfCards() || $this->player2->isOutOfCards();
+        return $currentBattle;
     }
 }

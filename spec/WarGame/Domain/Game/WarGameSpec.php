@@ -8,6 +8,8 @@ use WarGame\Domain\Card\Card;
 use WarGame\Domain\Card\Deck;
 use WarGame\Domain\Card\Rank;
 use WarGame\Domain\Card\Suit;
+use WarGame\Domain\Game\Battle;
+use WarGame\Domain\Game\GameIsOver;
 use WarGame\Domain\Player\Dealer;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
@@ -40,19 +42,9 @@ class WarGameSpec extends ObjectBehavior
         $jeremy->receiveCard(new Card(Rank::king(), Suit::clubs()));
 
         $this->beConstructedWith($lucas, $jeremy);
+        $this->playBattle()->shouldReturnAnInstanceOf(Battle::class);
         $this->getWinner()->shouldReturnAnInstanceOf(Player::class);
-    }
-
-    function it_returns_played_battles()
-    {
-        $lucas = Player::named('Lucas', PlayerId::generate());
-        $lucas->receiveCard(new Card(Rank::ace(), Suit::clubs()));
-
-        $jeremy = Player::named('Jeremy', PlayerId::generate());
-        $jeremy->receiveCard(new Card(Rank::king(), Suit::clubs()));
-
-        $this->beConstructedWith($lucas, $jeremy);
-        $this->getBattles()->shouldHaveCount(1);
+        $this->hasWinner()->shouldBe(true);
     }
 
     function it_returns_a_winner_even_if_players_have_same_rank_cards()
@@ -71,6 +63,26 @@ class WarGameSpec extends ObjectBehavior
         $dealer->dealCardsOneByOne();
 
         $this->beConstructedWith($lucas, $jeremy);
+        $this->playBattle();
         $this->getWinner()->shouldBeLike($jeremy); // Lucas is the first player to be out of cards
+    }
+
+    function it_throws_exception_if_trying_to_play_after_game_is_over()
+    {
+        $deck = new Deck([
+            new Card(Rank::ace(), Suit::clubs()),
+            new Card(Rank::king(), Suit::diamonds())
+        ]);
+
+        $lucas = Player::named('Lucas', PlayerId::generate());
+        $jeremy = Player::named('Jeremy', PlayerId::generate());
+
+        $dealer = new Dealer($deck, $lucas, $jeremy);
+        $dealer->dealCardsOneByOne();
+
+        $this->beConstructedWith($lucas, $jeremy);
+        $this->playBattle();
+        $this->getWinner()->shouldBeLike($jeremy);
+        $this->shouldThrow(GameIsOver::class)->during('playBattle');
     }
 }

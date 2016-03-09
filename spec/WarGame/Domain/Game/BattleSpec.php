@@ -58,7 +58,7 @@ class BattleSpec extends ObjectBehavior
         $player2->receiveCard(Card::random());
 
         $this->beConstructedWith($player1, $player2);
-        $this->shouldThrow(War::class)->during('play', [Battle::BATTLE_IS_IN_WAR]);
+        $this->shouldThrow(War::class)->during('play', [Battle::IS_IN_WAR]);
 
         $this->numberOfCardsInTheBattle()->shouldBe(8);
     }
@@ -111,7 +111,7 @@ class BattleSpec extends ObjectBehavior
         $this->beConstructedWith($player1, $player2);
         $this->shouldThrow(War::class)->during('play');
         $this->numberOfCardsInTheBattle()->shouldBe(2);
-        $this->shouldThrow(War::class)->during('play', [Battle::BATTLE_IS_IN_WAR]);
+        $this->shouldThrow(War::class)->during('play', [Battle::IS_IN_WAR]);
         $this->numberOfCardsInTheBattle()->shouldBe(10);
     }
 
@@ -141,7 +141,7 @@ class BattleSpec extends ObjectBehavior
         $player2->receiveCard(Card::random());
 
         $this->beConstructedWith($player1, $player2);
-        $this->play(Battle::BATTLE_IS_IN_WAR);
+        $this->play(Battle::IS_IN_WAR);
         $this->numberOfCardsInTheBattle()->shouldBe(1);
         $this->getWinner()->shouldBeLike($player2);
     }
@@ -160,7 +160,7 @@ class BattleSpec extends ObjectBehavior
         $player2->receiveCard(Card::random());
 
         $this->beConstructedWith($player1, $player2);
-        $this->play(Battle::BATTLE_IS_IN_WAR);
+        $this->play(Battle::IS_IN_WAR);
         $this->numberOfCardsInTheBattle()->shouldBe(7);
         $this->getWinner()->shouldBeLike($player1);
     }
@@ -175,7 +175,7 @@ class BattleSpec extends ObjectBehavior
         $player2->receiveCard(Card::random());
 
         $this->beConstructedWith($player1, $player2);
-        $this->play(Battle::BATTLE_IS_IN_WAR);
+        $this->play(Battle::IS_IN_WAR);
         $this->numberOfCardsInTheBattle()->shouldBe(2);
         $this->getWinner()->shouldBeLike($player2);
     }

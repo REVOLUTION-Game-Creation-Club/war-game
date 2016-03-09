@@ -9,8 +9,8 @@ use WarGame\Domain\Player\Player;
 
 final class Battle
 {
-    const BATTLE_IS_IN_WAR = true;
-    const BATTLE_IS_NOT_IN_WAR = false;
+    const IS_IN_WAR = true;
+    const IS_NOT_IN_WAR = false;
     const VARIANT_WAR_WITH_NB_CARDS = 3;
 
     /**
@@ -46,34 +46,18 @@ final class Battle
         $this->cardsFaceDown = [];
     }
 
-    private function playerAddsCardFaceUp(Player $player)
-    {
-        if (!array_key_exists($player->getId()->toString(), $this->cardsFaceUp)) {
-            $this->cardsFaceUp[$player->getId()->toString()] = $player->putOneCard();
-        }
-    }
-
-    private function playerAddsCardFaceDown(Player $player, $nbOfCardsFaceDown)
-    {
-        Assertion::greaterOrEqualThan($nbOfCardsFaceDown, 1, 'Players must put at least one card each (depending on the variant).');
-
-        while ($nbOfCardsFaceDown-- > 0) {
-            $this->cardsFaceDown[] = $player->putOneCard();
-        }
-    }
-
     /**
      * @param bool $isInWar
      *
      * @return Player Winner
      */
-    public function play($isInWar = self::BATTLE_IS_NOT_IN_WAR)
+    public function play($isInWar = self::IS_NOT_IN_WAR)
     {
         if ($this->player1->getNbOfCards() + $this->player2->getNbOfCards() + count($this->cardsFaceUp) < 2) {
             throw new BattleCannotTakePlace();
         }
 
-        if (self::BATTLE_IS_IN_WAR === $isInWar) {
+        if (self::IS_IN_WAR === $isInWar) {
             try {
                 $this->playerAddsCardFaceDown($this->player1, self::VARIANT_WAR_WITH_NB_CARDS);
             } catch (NotEnoughCards $e) {
@@ -109,26 +93,6 @@ final class Battle
     }
 
     /**
-     * @return Player Winner of the battle
-     */
-    private function resolveCardsUpBattle()
-    {
-        list($player1, $player2) = array_keys($this->cardsFaceUp);
-
-        if ($this->cardsFaceUp[$player1]->isEquals($this->cardsFaceUp[$player2])) {
-            $this->putAllCardsFaceDown();
-
-            throw new War();
-        }
-
-        if ($this->cardsFaceUp[$player1]->isGreaterThan($this->cardsFaceUp[$player2])) {
-            return $this->player1;
-        }
-
-        return $this->player2;
-    }
-
-    /**
      * @return Card[]
      */
     public function getAllCards()
@@ -150,6 +114,42 @@ final class Battle
     public function getWinner()
     {
         return $this->winner;
+    }
+
+    private function playerAddsCardFaceUp(Player $player)
+    {
+        if (!array_key_exists($player->getId()->toString(), $this->cardsFaceUp)) {
+            $this->cardsFaceUp[$player->getId()->toString()] = $player->putOneCard();
+        }
+    }
+
+    private function playerAddsCardFaceDown(Player $player, $nbOfCardsFaceDown)
+    {
+        Assertion::greaterOrEqualThan($nbOfCardsFaceDown, 1, 'Players must put at least one card each (depending on the variant).');
+
+        while ($nbOfCardsFaceDown-- > 0) {
+            $this->cardsFaceDown[] = $player->putOneCard();
+        }
+    }
+
+    /**
+     * @return Player Winner of the battle
+     */
+    private function resolveCardsUpBattle()
+    {
+        list($player1, $player2) = array_keys($this->cardsFaceUp);
+
+        if ($this->cardsFaceUp[$player1]->isEquals($this->cardsFaceUp[$player2])) {
+            $this->putAllCardsFaceDown();
+
+            throw new War();
+        }
+
+        if ($this->cardsFaceUp[$player1]->isGreaterThan($this->cardsFaceUp[$player2])) {
+            return $this->player1;
+        }
+
+        return $this->player2;
     }
 
     private function nominateAndAwardWinner(Player $winner)

@@ -1,6 +1,6 @@
 # War Game
 
-A PHP project to demonstrate how to do Domain Driven Development using BDD (Behat for stories and PHPSpec for specs).
+A PHP project to demonstrate how to do BDD (with Behat for stories and PHPSpec for specs).
 
 ## How to play war game
 

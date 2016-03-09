@@ -1,10 +1,10 @@
 <?php
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
-use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+use Behat\Behat\Tester\Exception\PendingException;
+use Behat\Gherkin\Node\PyStringNode;
 
 use PHPUnit_Framework_Assert as Assert;
 
@@ -53,6 +53,8 @@ class DomainContext implements Context, SnippetAcceptingContext
      * @var Player
      */
     private $currentBattleWinner;
+
+    private $nbOfPlayedBattles = 0;
 
     private $nbOfWarsDuringBattle = 0;
 
@@ -163,7 +165,7 @@ class DomainContext implements Context, SnippetAcceptingContext
     /**
      * @When players play a battle
      */
-    public function playersPlayABattle($isInWar = Battle::BATTLE_IS_NOT_IN_WAR)
+    public function playersPlayABattle($isInWar = Battle::IS_NOT_IN_WAR)
     {
         if (!$this->battle) {
             $this->battle = new Battle($this->player1, $this->player2);
@@ -174,7 +176,7 @@ class DomainContext implements Context, SnippetAcceptingContext
         } catch (War $e) {
             $this->nbOfWarsDuringBattle++;
 
-            $this->playersPlayABattle(Battle::BATTLE_IS_IN_WAR);
+            $this->playersPlayABattle(Battle::IS_IN_WAR);
         }
     }
 
@@ -202,7 +204,6 @@ class DomainContext implements Context, SnippetAcceptingContext
 
     /**
      * @Then there was/were :nbOfWars war(s)
-     *
      */
     public function thereWasWar($nbOfWars)
     {
@@ -259,6 +260,12 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function playersPlayTheGame()
     {
         $this->warGame = new WarGame($this->player1, $this->player2);
+
+        while (!$this->warGame->hasWinner()) {
+            $this->warGame->playBattle();
+
+            $this->nbOfPlayedBattles++;
+        }
     }
 
     /**
@@ -274,7 +281,7 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function theyPlayedBattles($nbOfBattles)
     {
-        Assert::assertSame(count($this->warGame->getBattles()), intval($nbOfBattles));
+        Assert::assertSame($this->nbOfPlayedBattles, intval($nbOfBattles));
     }
 
     // ===== TRANSFORM ===== //
