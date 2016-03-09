@@ -2,7 +2,6 @@
 
 namespace WarGame\Domain\Player;
 
-use Assert\Assertion;
 use WarGame\Domain\Card\Deck;
 
 final class Dealer
@@ -13,23 +12,27 @@ final class Dealer
     private $deck;
 
     /**
-     * @var Table
+     * @var Player
      */
-    private $table;
+    private $player1;
 
-    public function __construct(Deck $deck, Table $table)
+    /**
+     * @var Player
+     */
+    private $player2;
+
+    public function __construct(Deck $deck, Player $player1, Player $player2)
     {
-        Assertion::true($table->isFull(), 'Table is not full.');
-
         $this->deck = $deck;
-        $this->table = $table;
+        $this->player1 = $player1;
+        $this->player2 = $player2;
     }
 
     public function dealCardsOneByOne()
     {
         while (!$this->deck->isEmpty()) {
-            $this->table->getPlayer1()->receiveCard($this->deck->pickFromTheTop());
-            $this->table->getPlayer2()->receiveCard($this->deck->pickFromTheTop());
+            $this->player1->receiveCard($this->deck->pickFromTheTop());
+            $this->player2->receiveCard($this->deck->pickFromTheTop());
         }
     }
 }

@@ -6,14 +6,22 @@ use Assert\Assertion;
 use WarGame\Domain\Card\Card;
 use WarGame\Domain\Player\NotEnoughCards;
 use WarGame\Domain\Player\Player;
-use WarGame\Domain\Player\PlayerId;
-use WarGame\Domain\Player\Table;
 
 final class Battle
 {
     const BATTLE_IS_IN_WAR = true;
     const BATTLE_IS_NOT_IN_WAR = false;
     const VARIANT_WAR_WITH_NB_CARDS = 3;
+
+    /**
+     * @var Player
+     */
+    private $player1;
+
+    /**
+     * @var Player
+     */
+    private $player2;
 
     /**
      * @var Card[]
@@ -25,27 +33,17 @@ final class Battle
      */
     private $cardsFaceDown;
 
-    private $battleNumber;
-
-    /**
-     * @var Table
-     */
-    private $table;
-
     /**
      * @var Player $winner Winner of the battle
      */
     private $winner;
 
-    public function __construct($battleNumber, Table $table)
+    public function __construct(Player $player1, Player $player2)
     {
-        Assertion::integer($battleNumber, 'Battle number should be a number.');
-        Assertion::true($table->isFull(), 'Table has to be full to start a new battle.');
-
+        $this->player1 = $player1;
+        $this->player2 = $player2;
         $this->cardsFaceUp = [];
         $this->cardsFaceDown = [];
-        $this->battleNumber = $battleNumber;
-        $this->table = $table;
     }
 
     private function playerAddsCardFaceUp(Player $player)
@@ -71,47 +69,47 @@ final class Battle
      */
     public function play($isInWar = self::BATTLE_IS_NOT_IN_WAR)
     {
-        if ($this->table->getPlayer1()->getNbOfCards() + $this->table->getPlayer2()->getNbOfCards() + count($this->cardsFaceUp) < 2) {
+        if ($this->player1->getNbOfCards() + $this->player2->getNbOfCards() + count($this->cardsFaceUp) < 2) {
             throw new BattleCannotTakePlace();
         }
 
         if (self::BATTLE_IS_IN_WAR === $isInWar) {
             try {
-                $this->playerAddsCardFaceDown($this->table->getPlayer1(), self::VARIANT_WAR_WITH_NB_CARDS);
+                $this->playerAddsCardFaceDown($this->player1, self::VARIANT_WAR_WITH_NB_CARDS);
             } catch (NotEnoughCards $e) {
-                return $this->nominateAndAwardWinner($this->table->getPlayer2());
+                return $this->nominateAndAwardWinner($this->player2);
             }
 
             try {
-                $this->playerAddsCardFaceDown($this->table->getPlayer2(), self::VARIANT_WAR_WITH_NB_CARDS);
+                $this->playerAddsCardFaceDown($this->player2, self::VARIANT_WAR_WITH_NB_CARDS);
             } catch (NotEnoughCards $e) {
-                return $this->nominateAndAwardWinner($this->table->getPlayer1());
+                return $this->nominateAndAwardWinner($this->player1);
             }
         }
 
         try {
-            $this->playerAddsCardFaceUp($this->table->getPlayer1());
+            $this->playerAddsCardFaceUp($this->player1);
         } catch (NotEnoughCards $e) {
-            return $this->nominateAndAwardWinner($this->table->getPlayer2());
+            return $this->nominateAndAwardWinner($this->player2);
         }
 
         try {
-            $this->playerAddsCardFaceUp($this->table->getPlayer2());
+            $this->playerAddsCardFaceUp($this->player2);
         } catch (NotEnoughCards $e) {
-            return $this->nominateAndAwardWinner($this->table->getPlayer1());
+            return $this->nominateAndAwardWinner($this->player1);
         }
 
         if (count($this->cardsFaceUp) === 2) {
-            $winnerId = $this->resolveCardsUpBattle();
+            $winner = $this->resolveCardsUpBattle();
 
-            return $this->nominateAndAwardWinner($this->table->get($winnerId));
+            return $this->nominateAndAwardWinner($winner);
         }
 
         throw new BattleCannotTakePlace();
     }
 
     /**
-     * @return PlayerId Winner id
+     * @return Player Winner of the battle
      */
     private function resolveCardsUpBattle()
     {
@@ -124,10 +122,10 @@ final class Battle
         }
 
         if ($this->cardsFaceUp[$player1]->isGreaterThan($this->cardsFaceUp[$player2])) {
-            return PlayerId::fromString($player1);
+            return $this->player1;
         }
 
-        return PlayerId::fromString($player2);
+        return $this->player2;
     }
 
     /**

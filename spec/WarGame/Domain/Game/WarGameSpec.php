@@ -11,30 +11,24 @@ use WarGame\Domain\Card\Suit;
 use WarGame\Domain\Player\Dealer;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
-use WarGame\Domain\Player\Table;
 
 class WarGameSpec extends ObjectBehavior
 {
     function it_is_initializable()
     {
-        $this->beConstructedWith(new Table());
-        $this->shouldHaveType('WarGame\Domain\Game\WarGame');
-    }
+        $player1 = Player::named('Lucas', PlayerId::generate());
+        $player2 = Player::named('Jeremy', PlayerId::generate());
 
-    function it_does_not_init_if_table_is_not_full()
-    {
-        $table = new Table();
-        $table->welcome(Player::named('Lucas', PlayerId::generate()));
-        $this->shouldThrow(\InvalidArgumentException::class)->during('__construct', [$table]);
+        $this->beConstructedWith($player1, $player2);
+        $this->shouldHaveType('WarGame\Domain\Game\WarGame');
     }
 
     function it_does_not_init_if_players_have_no_card()
     {
-        $table = new Table();
-        $table->welcome(Player::named('Lucas', PlayerId::generate()));
-        $table->welcome(Player::named('Jeremy', PlayerId::generate()));
+        $player1 = Player::named('Lucas', PlayerId::generate());
+        $player2 = Player::named('Jeremy', PlayerId::generate());
 
-        $this->shouldThrow(\InvalidArgumentException::class)->during('__construct', [$table]);
+        $this->shouldThrow(\InvalidArgumentException::class)->during('__construct', [$player1, $player2]);
     }
 
     function it_gets_the_winner()
@@ -45,11 +39,7 @@ class WarGameSpec extends ObjectBehavior
         $jeremy = Player::named('Jeremy', PlayerId::generate());
         $jeremy->receiveCard(new Card(Rank::king(), Suit::clubs()));
 
-        $table = new Table();
-        $table->welcome($lucas);
-        $table->welcome($jeremy);
-
-        $this->beConstructedWith($table);
+        $this->beConstructedWith($lucas, $jeremy);
         $this->getWinner()->shouldReturnAnInstanceOf(Player::class);
     }
 
@@ -61,11 +51,7 @@ class WarGameSpec extends ObjectBehavior
         $jeremy = Player::named('Jeremy', PlayerId::generate());
         $jeremy->receiveCard(new Card(Rank::king(), Suit::clubs()));
 
-        $table = new Table();
-        $table->welcome($lucas);
-        $table->welcome($jeremy);
-
-        $this->beConstructedWith($table);
+        $this->beConstructedWith($lucas, $jeremy);
         $this->getBattles()->shouldHaveCount(1);
     }
 
@@ -81,14 +67,10 @@ class WarGameSpec extends ObjectBehavior
         $lucas = Player::named('Lucas', PlayerId::generate());
         $jeremy = Player::named('Jeremy', PlayerId::generate());
 
-        $table = new Table();
-        $table->welcome($lucas);
-        $table->welcome($jeremy);
-
-        $dealer = new Dealer($deck, $table);
+        $dealer = new Dealer($deck, $lucas, $jeremy);
         $dealer->dealCardsOneByOne();
 
-        $this->beConstructedWith($table);
+        $this->beConstructedWith($lucas, $jeremy);
         $this->getWinner()->shouldBeLike($jeremy); // Lucas is the first player to be out of cards
     }
 }

@@ -12,7 +12,6 @@ use WarGame\Domain\Game\WarGame;
 use WarGame\Domain\Player\Dealer;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
-use WarGame\Domain\Player\Table;
 
 class PlayWarGameCommand extends Command
 {
@@ -40,21 +39,16 @@ class PlayWarGameCommand extends Command
             $nameOfPlayer2 = $questionHelper->ask($input, $output, new Question('Who is the second player? > ', 'Player 2'));
         }
 
-        $table = new Table();
-
         $player1 = Player::named($nameOfPlayer1, PlayerId::generate());
-        $table->welcome($player1);
-
         $player2 = Player::named($nameOfPlayer2, PlayerId::generate());
-        $table->welcome($player2);
 
         $deck = Deck::frenchDeck();
         $deck->shuffle();
 
-        $dealer = new Dealer($deck, $table);
+        $dealer = new Dealer($deck, $player1, $player2);
         $dealer->dealCardsOneByOne();
 
-        $warGame = new WarGame($table);
+        $warGame = new WarGame($player1, $player2);
 
         foreach ($warGame->getBattles() as $battleNumber => $playedBattle) {
             $output->writeln(

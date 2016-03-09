@@ -18,7 +18,6 @@ use WarGame\Domain\Game\WarGame;
 use WarGame\Domain\Player\Dealer;
 use WarGame\Domain\Player\Player;
 use WarGame\Domain\Player\PlayerId;
-use WarGame\Domain\Player\Table;
 
 /**
  * Defines application features from the specific context.
@@ -41,9 +40,14 @@ class DomainContext implements Context, SnippetAcceptingContext
     private $battle;
 
     /**
-     * @var Table
+     * @var Player
      */
-    private $table;
+    private $player1;
+
+    /**
+     * @var Player
+     */
+    private $player2;
 
     /**
      * @var Player
@@ -86,11 +90,8 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function thereAreTwoPlayersAroundTheTable()
     {
-        $this->table = new Table();
-        $this->table->welcome(Player::named('Player 1', PlayerId::generate()));
-        $this->table->welcome(Player::named('Player 2', PlayerId::generate()));
-
-        Assert::assertTrue($this->table->isFull());
+        $this->player1 = Player::named('Player 1', PlayerId::generate());
+        $this->player2 = Player::named('Player 2', PlayerId::generate());
     }
 
     /**
@@ -98,7 +99,7 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function iDealAllTheCardsFaceDownOneAtATime()
     {
-        $dealer = new Dealer($this->deck, $this->table);
+        $dealer = new Dealer($this->deck, $this->player1, $this->player2);
         $dealer->dealCardsOneByOne();
     }
 
@@ -107,8 +108,8 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function eachPlayerHasCards($nbOfCards)
     {
-        Assert::assertSame($this->table->getPlayer1()->getNbOfCards(), intval($nbOfCards));
-        Assert::assertSame($this->table->getPlayer2()->getNbOfCards(), intval($nbOfCards));
+        Assert::assertSame($this->player1->getNbOfCards(), intval($nbOfCards));
+        Assert::assertSame($this->player2->getNbOfCards(), intval($nbOfCards));
     }
 
     /**
@@ -165,7 +166,7 @@ class DomainContext implements Context, SnippetAcceptingContext
     public function playersPlayABattle($isInWar = Battle::BATTLE_IS_NOT_IN_WAR)
     {
         if (!$this->battle) {
-            $this->battle = new Battle(1, $this->table);
+            $this->battle = new Battle($this->player1, $this->player2);
         }
 
         try {
@@ -257,7 +258,7 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function playersPlayTheGame()
     {
-        $this->warGame = new WarGame($this->table);
+        $this->warGame = new WarGame($this->player1, $this->player2);
     }
 
     /**
@@ -282,6 +283,6 @@ class DomainContext implements Context, SnippetAcceptingContext
      */
     public function castPlayerNumberToPlayer($playerNumber)
     {
-        return intval($playerNumber) === 1 ? $this->table->getPlayer1() : $this->table->getPlayer2();
+        return intval($playerNumber) === 1 ? $this->player1 : $this->player2;
     }
 }

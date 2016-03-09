@@ -4,7 +4,6 @@ namespace WarGame\Domain\Game;
 
 use Assert\Assertion;
 use WarGame\Domain\Player\Player;
-use WarGame\Domain\Player\Table;
 
 class WarGame
 {
@@ -19,9 +18,19 @@ class WarGame
     const MAX_WARS = 5;
 
     /**
-     * @var Table $table A group of 2 players
+     * @var Player
      */
-    private $table;
+    private $player1;
+
+    /**
+     * @var Player
+     */
+    private $player2;
+
+    /**
+     * @var Player
+     */
+    private $winner;
 
     /**
      * @var Battle[] $battles Battles
@@ -38,23 +47,18 @@ class WarGame
      */
     private $timesPlayersHaveBeenInWar;
 
-    /**
-     * @var Player
-     */
-    private $winner;
-
-    public function __construct(Table $table)
+    public function __construct(Player $player1, Player $player2)
     {
-        Assertion::true($table->isFull(), 'Table is not full.');
-        Assertion::false($table->getPlayer1()->isOutOfCards(), 'Player 1 is out of cards.');
-        Assertion::false($table->getPlayer2()->isOutOfCards(), 'Player 2 is out of cards.');
+        Assertion::false($player1->isOutOfCards(), 'Player 1 is out of cards.');
+        Assertion::false($player2->isOutOfCards(), 'Player 2 is out of cards.');
 
-        $this->table = $table;
+        $this->player1 = $player1;
+        $this->player2 = $player2;
         $this->battles = [];
         $this->isCurrentlyInWar = false;
         $this->timesPlayersHaveBeenInWar = [
-            $this->table->getPlayer1()->getId()->toString() => 0,
-            $this->table->getPlayer2()->getId()->toString() => 0
+            $this->player1->getId()->toString() => 0,
+            $this->player2->getId()->toString() => 0
         ];
 
         $this->play();
@@ -82,7 +86,7 @@ class WarGame
 
         do {
             if (false === $this->isCurrentlyInWar) {
-                $this->battles[$battleNumber] = new Battle($battleNumber, $this->table);
+                $this->battles[$battleNumber] = new Battle($this->player1, $this->player2);
             }
 
             try {
@@ -109,9 +113,9 @@ class WarGame
         } while ($this->isCurrentlyInWar || !$this->oneOfThePlayersRanOutOfCards());
 
         if (null === $this->winner) {
-            $this->winner = $this->table->getPlayer1()->isOutOfCards()
-                ? $this->table->getPlayer2()
-                : $this->table->getPlayer1();
+            $this->winner = $this->player1->isOutOfCards()
+                ? $this->player2
+                : $this->player1;
         }
     }
 
@@ -120,6 +124,6 @@ class WarGame
      */
     private function oneOfThePlayersRanOutOfCards()
     {
-        return $this->table->getPlayer1()->isOutOfCards() || $this->table->getPlayer2()->isOutOfCards();
+        return $this->player1->isOutOfCards() || $this->player2->isOutOfCards();
     }
 }
